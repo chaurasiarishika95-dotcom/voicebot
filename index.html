@@ -284,98 +284,47 @@ if (!isSecure){
   supportEl.innerHTML = 'Voice input needs a secure origin (HTTPS or localhost) — browsers block microphone access on files opened directly from disk (file://). '
     + 'Open this over http://localhost or a hosted https:// link to enable it. Typed input and spoken bot replies still work here.';
 } else if (SpeechRecognitionAPI){
-  const SILENCE_TIMEOUT_MS = 20000;   // process once this long passes with no new speech
-  const MAX_RECORDING_MS = 50000;     // hard stop regardless of pauses
-
   let listening = false;
-  let stopRequested = false;   // true only when WE want it to actually end
-  let finalTranscript = '';
-  let silenceTimer = null;
-  let hardStopTimer = null;
-  let restartPending = false;
-  let recognizer = null;
-
-  function clearTimers(){
-    if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
-    if (hardStopTimer) { clearTimeout(hardStopTimer); hardStopTimer = null; }
-  }
-
-  function armSilenceTimer(){
-    if (silenceTimer) clearTimeout(silenceTimer);
-    silenceTimer = setTimeout(() => {
-      stopRequested = true;
-      supportEl.textContent = 'Pause detected — processing what was said.';
-      if (recognizer) recognizer.stop();
-    }, SILENCE_TIMEOUT_MS);
-  }
 
   function buildRecognizer(){
     const r = new SpeechRecognitionAPI();
     r.lang = 'en-US';
-    r.continuous = true;
-    r.interimResults = true;
+    r.continuous = false;      // let the browser's own natural endpointing decide when you're done — same as Google's mic search
+    r.interimResults = true;   // still show live partial text while you talk
     r.maxAlternatives = 1;
 
     r.addEventListener('result', e => {
+      let finalText = '';
       let interim = '';
-      for (let i = e.resultIndex; i < e.results.length; i++){
+      for (let i = 0; i < e.results.length; i++){
         const chunk = e.results[i][0].transcript;
-        if (e.results[i].isFinal) finalTranscript += chunk + ' ';
+        if (e.results[i].isFinal) finalText += chunk;
         else interim += chunk;
       }
-      input.value = (finalTranscript + interim).trim();
+      input.value = (finalText + interim).trim();
       supportEl.textContent = 'Listening… ("' + input.value + '")';
-      armSilenceTimer(); // any new speech resets the pause clock
     });
 
     r.addEventListener('end', () => {
-      if (!stopRequested && listening && !restartPending){
-        // Chrome/Edge end the underlying session early even with continuous:true.
-        // A fresh instance (not the same object restarted) avoids the object
-        // getting stuck in a bad internal state after repeated stop/start cycles.
-        restartPending = true;
-        setTimeout(() => {
-          restartPending = false;
-          if (stopRequested || !listening) return;
-          try {
-            recognizer = buildRecognizer();
-            recognizer.start();
-          } catch (e) {
-            listening = false;
-            clearTimers();
-            micBtn.classList.remove('listening');
-            micBtn.textContent = 'Speak';
-            supportEl.textContent = 'Lost the listening session unexpectedly — tap Speak to try again.';
-          }
-        }, 300);
-        return;
-      }
       listening = false;
-      clearTimers();
       micBtn.classList.remove('listening');
       micBtn.textContent = 'Speak';
-      const said = finalTranscript.trim() || input.value.trim();
-      finalTranscript = '';
+      const said = input.value.trim();
       if (said){
         input.value = '';
         handleMessage(said);
       } else {
-        supportEl.textContent = 'No speech was captured — try again, and make sure to speak right after the button turns red.';
+        supportEl.textContent = 'No speech was captured — try again.';
       }
     });
 
     r.addEventListener('error', e => {
-      // 'no-speech' just means a brief silent gap — let the 'end' handler's
-      // auto-restart logic handle it rather than treating it as a real failure.
-      if (e.error === 'no-speech' && !stopRequested) return;
-
       listening = false;
-      stopRequested = true;
-      clearTimers();
       micBtn.classList.remove('listening');
       micBtn.textContent = 'Speak';
       const reasons = {
         'not-allowed': 'Microphone permission was blocked. Click the padlock/site-settings icon in the address bar and allow microphone access, then try again.',
+        'no-speech': 'No speech was detected — try again and speak right after clicking Speak.',
         'audio-capture': 'No microphone was found. Check that a mic is connected and not in use by another app.',
         'network': 'A network error interrupted speech recognition — check your connection and try again.',
         'aborted': 'Listening was stopped before anything was heard.',
@@ -387,24 +336,15 @@ if (!isSecure){
   }
 
   micBtn.addEventListener('click', () => {
-    if (listening) { stopRequested = true; if (recognizer) recognizer.stop(); return; }
+    if (listening) return;
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     try {
-      finalTranscript = '';
       input.value = '';
-      stopRequested = false;
       listening = true;
       micBtn.classList.add('listening');
-      micBtn.textContent = 'Listening… (click to stop)';
-      supportEl.textContent = 'Listening — take your time, it\u2019ll wait for a pause before sending.';
-      recognizer = buildRecognizer();
-      recognizer.start();
-      armSilenceTimer();
-      hardStopTimer = setTimeout(() => {
-        stopRequested = true;
-        supportEl.textContent = 'Max listening time reached — processing what was said.';
-        if (recognizer) recognizer.stop();
-      }, MAX_RECORDING_MS);
+      micBtn.textContent = 'Listening…';
+      supportEl.textContent = 'Listening — speak now.';
+      buildRecognizer().start();
     } catch (err) {
       listening = false;
       micBtn.classList.remove('listening');
@@ -412,7 +352,7 @@ if (!isSecure){
       supportEl.textContent = 'Could not start listening: ' + err.message;
     }
   });
-  supportEl.textContent = 'Voice input/output uses your browser\u2019s built-in speech engine (best supported in Chrome/Edge). Nothing is sent to a server. It listens continuously and waits for a pause before sending.';
+  supportEl.textContent = 'Voice input/output uses your browser\u2019s built-in speech engine (best supported in Chrome/Edge). Nothing is sent to a server.';
 } else {
   micBtn.classList.add('unsupported');
   micBtn.textContent = 'Speak (unsupported)';
