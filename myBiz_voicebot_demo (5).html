@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>myBiz Voice Bot — Interactive Demo</title>
+<style>
+  :root{
+    --navy:#10233B; --navy2:#16304F; --paper:#F3EEE3; --ink:#1B2430; --ink-soft:#5B6472;
+    --teal:#2F7A5D; --teal-dark:#1E4F3C; --coral:#B5502E; --coral-dark:#7A3620; --line:#D8CFBB;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--navy);color:var(--paper);font-family:Georgia,'Iowan Old Style',serif;padding:32px 20px 60px;}
+  .wrap{max-width:920px;margin:0 auto;}
+  header{margin-bottom:22px;border-bottom:1px solid #2A4160;padding-bottom:18px;}
+  h1{font-size:24px;font-weight:normal;margin:0 0 6px;}
+  .sub{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#9FB1C7;max-width:640px;line-height:1.5;}
+  .toggle{display:flex;background:var(--navy2);border:1px solid #2A4160;border-radius:4px;overflow:hidden;font-family:Arial,sans-serif;font-size:13px;margin-top:14px;width:fit-content;}
+  .toggle button{background:none;border:none;color:#9FB1C7;padding:9px 14px;cursor:pointer;}
+  .toggle button.active{background:#D98E2B;color:#33220A;font-weight:bold;}
+  .grid{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;}
+  @media(max-width:760px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--paper);color:var(--ink);border-radius:6px;padding:18px 20px;}
+  .call-card{display:flex;flex-direction:column;height:520px;}
+  .call-head{font-family:Arial,sans-serif;font-size:12px;color:var(--ink-soft);display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding-bottom:10px;margin-bottom:12px;}
+  .badge{display:inline-block;font-family:Arial,sans-serif;font-size:11px;padding:3px 9px;border-radius:3px;font-weight:bold;}
+  .badge.today{background:#F5E3DA;color:var(--coral-dark);}
+  .badge.future{background:#E4F0EA;color:var(--teal-dark);}
+  .transcript{font-family:'Courier New',Courier,monospace;font-size:13.5px;line-height:1.6;flex:1;overflow-y:auto;padding-right:4px;}
+  .line{margin:0 0 10px;}
+  .who{font-weight:bold;}
+  .who.bot{color:var(--teal-dark);}
+  .who.caller{color:var(--coral-dark);}
+  .composer{display:flex;gap:8px;margin-top:12px;border-top:1px dashed var(--line);padding-top:12px;}
+  .composer input{flex:1;font-family:Arial,sans-serif;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--ink);}
+  .composer button{font-family:Arial,sans-serif;font-size:13px;background:var(--teal);color:#fff;border:none;padding:0 16px;border-radius:4px;cursor:pointer;}
+  .composer button:hover{background:var(--teal-dark);}
+  #mic{background:#fff;color:var(--teal-dark);border:1px solid var(--teal);}
+  #mic:hover{background:#E4F0EA;}
+  #mic.listening{background:var(--coral);color:#fff;border-color:var(--coral);}
+  #mic.unsupported{background:#fff;color:var(--ink-soft);border-color:var(--line);cursor:not-allowed;}
+  .hint{font-family:Arial,sans-serif;font-size:11px;color:var(--ink-soft);margin-top:8px;}
+  .quick{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+  .quick button{font-family:Arial,sans-serif;font-size:11px;background:none;border:1px solid var(--line);color:var(--ink-soft);padding:5px 9px;border-radius:12px;cursor:pointer;}
+  .quick button:hover{border-color:var(--ink-soft);color:var(--ink);}
+  .side .card{margin-bottom:16px;}
+  .side h3{font-family:Arial,sans-serif;font-size:12px;color:var(--ink-soft);margin:0 0 12px;font-weight:bold;}
+  .eval-row{display:flex;align-items:center;gap:10px;font-family:Arial,sans-serif;font-size:13px;padding:7px 0;border-bottom:1px solid #EFE9DC;}
+  .eval-row:last-child{border-bottom:none;}
+  .dot{width:9px;height:9px;border-radius:50%;background:#D8CFBB;flex-shrink:0;transition:background .3s ease;}
+  .dot.pass{background:var(--teal);}
+  .dot.fail{background:var(--coral);}
+  .gauge-wrap{font-family:Arial,sans-serif;}
+  .gauge-num{font-size:32px;font-weight:bold;color:var(--teal-dark);transition:color .3s ease;}
+  .gauge-label{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .bar-track{height:8px;background:#EFE9DC;border-radius:4px;margin-top:12px;overflow:hidden;}
+  .bar-fill{height:100%;width:0%;background:var(--teal);border-radius:4px;transition:width .4s ease, background .4s ease;}
+  .reset{font-family:Arial,sans-serif;font-size:12px;background:none;border:1px solid var(--line);color:var(--ink-soft);padding:6px 12px;border-radius:4px;cursor:pointer;}
+  footer{font-family:Arial,sans-serif;font-size:12px;color:#7E90A6;margin-top:24px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>myBiz voice bot — try it yourself</h1>
+    <div class="sub">Talk or type a real request, however you'd naturally phrase it. This bot handles routine post-sales requests end-to-end on its own, and only loops in a human for the handful of things that genuinely need one — try a few different kinds of requests to see where that line sits.</div>
+  </header>
+
+  <div class="grid">
+    <div class="card call-card">
+      <div class="call-head">
+        <span id="mode-badge" class="badge future">Voice bot</span>
+        <button class="reset" id="reset">Reset call ↺</button>
+      </div>
+      <div class="transcript" id="transcript"></div>
+      <div class="composer">
+        <button id="mic" title="Speak your request">Speak</button>
+        <input id="input" type="text" placeholder="e.g. can you push my flight to Friday instead" autocomplete="off">
+        <button id="send">Send</button>
+      </div>
+      <div class="quick">
+        <button data-txt="Hey, can you move my Delhi to Bangalore flight from Thursday to Friday?">Try: reschedule</button>
+        <button data-txt="I want to cancel my booking and get a refund">Try: cancellation</button>
+        <button data-txt="I need business class this time, I have a back injury">Try: policy exception</button>
+        <button data-txt="What's the weather like in Bangalore">Try: off-topic</button>
+        <button id="mute-toggle" data-muted="false">Mute bot voice</button>
+      </div>
+      <div class="hint" id="speech-support"></div>
+    </div>
+
+    <div class="side">
+      <div class="card">
+        <h3>Live eval checklist</h3>
+        <div id="eval-list">
+          <div class="eval-row"><span class="dot" data-key="entity"></span><span>Understood the request correctly</span></div>
+          <div class="eval-row"><span class="dot" data-key="handoff"></span><span>Right call: resolve it or hand it off</span></div>
+          <div class="eval-row"><span class="dot" data-key="resolved"></span><span>Resolved without a human agent</span></div>
+          <div class="eval-row"><span class="dot" data-key="clarity"></span><span>Clear, warm response either way</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Frustration score</h3>
+        <div class="gauge-wrap">
+          <div class="gauge-num" id="gauge-num">0</div>
+          <div class="gauge-label">0 = calm, 100 = highly frustrated</div>
+          <div class="bar-track"><div class="bar-fill" id="gauge-fill"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    This is a rule-based simulation, not a production NLU model, so unusual phrasing may not be recognized. The design point it's making: reschedules and cancellations are routine and fully automatable once the bot has backend access — the bot handles those completely on its own. Policy exceptions (like the business-class example) genuinely need a human judgment call, so it escalates those — quickly, and by name, not as a catch-all fallback.
+  </footer>
+</div>
+
+<script>
+let turns = 0;
+let frustration = 0;
+let resolvedInThisCall = false;
+
+const transcriptEl = document.getElementById('transcript');
+const input = document.getElementById('input');
+
+let botMuted = false;
+
+function addLine(who, text){
+  const div = document.createElement('div');
+  div.className = 'line';
+  div.innerHTML = '<span class="who ' + who + '">' + (who==='bot' ? 'Bot: ' : 'You: ') + '</span>' + escapeHtml(text);
+  transcriptEl.appendChild(div);
+  transcriptEl.scrollTop = transcriptEl.scrollHeight;
+  if (who === 'bot' && !botMuted && 'speechSynthesis' in window){
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 1.02;
+    window.speechSynthesis.speak(utter);
+  }
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function setEval(key, state){
+  const dot = document.querySelector('.dot[data-key="'+key+'"]');
+  dot.classList.remove('pass','fail');
+  if (state === true) dot.classList.add('pass');
+  if (state === false) dot.classList.add('fail');
+}
+
+function setFrustration(delta){
+  frustration = Math.max(0, Math.min(100, frustration + delta));
+  document.getElementById('gauge-num').textContent = frustration;
+  const fill = document.getElementById('gauge-fill');
+  fill.style.width = frustration + '%';
+  fill.style.background = frustration > 40 ? '#B5502E' : '#2F7A5D';
+}
+
+function resetCall(){
+  transcriptEl.innerHTML = '';
+  turns = 0;
+  frustration = 0;
+  resolvedInThisCall = false;
+  setFrustration(0);
+  ['entity','handoff','resolved','clarity'].forEach(k => setEval(k, null));
+  addLine('bot', 'Hi there, thanks for calling myBiz support — this is Maya. What can I help you with today?');
+}
+
+function detectCity(text){
+  const cities = ['bangalore','bengaluru','delhi','mumbai','chennai','pune','hyderabad','kolkata','coimbatore'];
+  return cities.find(c => text.toLowerCase().includes(c));
+}
+function detectDay(text){
+  const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday','tomorrow','today'];
+  return days.find(d => text.toLowerCase().includes(d));
+}
+
+function handleMessage(raw){
+  const text = raw.trim();
+  if (!text) return;
+  addLine('caller', text);
+  turns++;
+  const lower = text.toLowerCase();
+
+  const rescheduleWords = ['reschedule','move my flight','push my flight','change my flight','change the date','move it to','shift my flight'];
+  const cancelWords = ['cancel', 'refund'];
+  const exceptionWords = ['business class', 'upgrade', 'exception', 'injury', 'medical', 'policy', 'above the limit', 'over budget', 'waive'];
+
+  const isException = exceptionWords.some(w => lower.includes(w));
+  const isReschedule = !isException && (rescheduleWords.some(w => lower.includes(w)) || (lower.includes('flight') && detectDay(lower) && !cancelWords.some(w=>lower.includes(w))));
+  const isCancelRefund = !isException && cancelWords.some(w => lower.includes(w));
+
+  if (isReschedule){
+    const city = detectCity(lower) || 'Bangalore';
+    const day = detectDay(lower) || 'Friday';
+    setEval('entity', true);
+    setTimeout(() => {
+      addLine('bot', 'Sure thing, let me pull that up… okay, got it — your flight to ' + cap(city) + ' on booking MMT48213.');
+      setTimeout(() => {
+        addLine('bot', 'Good news, ' + cap(day) + ' works — there\u2019s a seat and no change fee under your travel policy. Done! I\u2019ve moved it to ' + cap(day) + ', and you\u2019ll get a confirmation by SMS and email in a moment.');
+        addLine('bot', 'Anything else I can help with?');
+        setEval('handoff', true);
+        setEval('resolved', true);
+        setEval('clarity', true);
+        setFrustration(2);
+        resolvedInThisCall = true;
+      }, 700);
+    }, 500);
+    return;
+  }
+
+  if (isCancelRefund){
+    setEval('entity', true);
+    setTimeout(() => {
+      addLine('bot', 'No problem, I can take care of that. Let me check the fare rules on this one… ');
+      setTimeout(() => {
+        addLine('bot', 'All set — I\u2019ve cancelled MMT48213, and your refund of ₹8,400 will land back on your original payment method in about 5-7 business days. You\u2019ll get an email confirming it shortly.');
+        addLine('bot', 'Anything else I can help with?');
+        setEval('handoff', true);
+        setEval('resolved', true);
+        setEval('clarity', true);
+        setFrustration(2);
+        resolvedInThisCall = true;
+      }, 700);
+    }, 500);
+    return;
+  }
+
+  if (isException){
+    setEval('entity', true);
+    setTimeout(() => {
+      addLine('bot', 'I hear you, and I want to get this right for you. This falls outside standard policy, so it needs a quick judgment call from someone on our exceptions team rather than a rule I can apply myself.');
+      addLine('bot', 'Let me connect you now — I\u2019ll pass along everything you\u2019ve told me so you don\u2019t have to repeat it.');
+      setEval('handoff', true);
+      setEval('resolved', false);
+      setEval('clarity', true);
+      setFrustration(8);
+    }, 500);
+    return;
+  }
+
+  // Off-topic / unrecognized
+  setEval('entity', false);
+  setTimeout(() => {
+    addLine('bot', 'Hmm, that\u2019s a bit outside what I handle here — I\u2019m set up for post-booking stuff like reschedules, cancellations, and refunds. Let me get you to someone who can help with that.');
+    setEval('handoff', true);
+    setEval('resolved', false);
+    setEval('clarity', true);
+    setFrustration(12);
+  }, 500);
+}
+
+function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+document.getElementById('send').addEventListener('click', () => {
+  handleMessage(input.value);
+  input.value = '';
+});
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter'){ handleMessage(input.value); input.value=''; }
+});
+document.querySelectorAll('.quick button').forEach(b => {
+  b.addEventListener('click', () => { input.value = b.dataset.txt; handleMessage(input.value); input.value=''; });
+});
+
+document.getElementById('reset').addEventListener('click', resetCall);
+
+document.getElementById('mute-toggle').addEventListener('click', function(){
+  botMuted = !botMuted;
+  this.textContent = botMuted ? 'Unmute bot voice' : 'Mute bot voice';
+  if (botMuted && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+});
+
+const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+const micBtn = document.getElementById('mic');
+const supportEl = document.getElementById('speech-support');
+const isSecure = window.isSecureContext === true || location.protocol === 'https:' || location.hostname === 'localhost';
+
+if (!isSecure){
+  micBtn.classList.add('unsupported');
+  micBtn.textContent = 'Speak (needs HTTPS)';
+  micBtn.disabled = true;
+  supportEl.innerHTML = 'Voice input needs a secure origin (HTTPS or localhost) — browsers block microphone access on files opened directly from disk (file://). '
+    + 'Open this over http://localhost or a hosted https:// link to enable it. Typed input and spoken bot replies still work here.';
+} else if (SpeechRecognitionAPI){
+  const SILENCE_TIMEOUT_MS = 20000;   // process once this long passes with no new speech
+  const MAX_RECORDING_MS = 50000;     // hard stop regardless of pauses
+
+  let listening = false;
+  let stopRequested = false;   // true only when WE want it to actually end
+  let finalTranscript = '';
+  let silenceTimer = null;
+  let hardStopTimer = null;
+  let restartPending = false;
+  let recognizer = null;
+
+  function clearTimers(){
+    if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
+    if (hardStopTimer) { clearTimeout(hardStopTimer); hardStopTimer = null; }
+  }
+
+  function armSilenceTimer(){
+    if (silenceTimer) clearTimeout(silenceTimer);
+    silenceTimer = setTimeout(() => {
+      stopRequested = true;
+      supportEl.textContent = 'Pause detected — processing what was said.';
+      if (recognizer) recognizer.stop();
+    }, SILENCE_TIMEOUT_MS);
+  }
+
+  function buildRecognizer(){
+    const r = new SpeechRecognitionAPI();
+    r.lang = 'en-US';
+    r.continuous = true;
+    r.interimResults = true;
+    r.maxAlternatives = 1;
+
+    r.addEventListener('result', e => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++){
+        const chunk = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalTranscript += chunk + ' ';
+        else interim += chunk;
+      }
+      input.value = (finalTranscript + interim).trim();
+      supportEl.textContent = 'Listening… ("' + input.value + '")';
+      armSilenceTimer(); // any new speech resets the pause clock
+    });
+
+    r.addEventListener('end', () => {
+      if (!stopRequested && listening && !restartPending){
+        // Chrome/Edge end the underlying session early even with continuous:true.
+        // A fresh instance (not the same object restarted) avoids the object
+        // getting stuck in a bad internal state after repeated stop/start cycles.
+        restartPending = true;
+        setTimeout(() => {
+          restartPending = false;
+          if (stopRequested || !listening) return;
+          try {
+            recognizer = buildRecognizer();
+            recognizer.start();
+          } catch (e) {
+            listening = false;
+            clearTimers();
+            micBtn.classList.remove('listening');
+            micBtn.textContent = 'Speak';
+            supportEl.textContent = 'Lost the listening session unexpectedly — tap Speak to try again.';
+          }
+        }, 300);
+        return;
+      }
+      listening = false;
+      clearTimers();
+      micBtn.classList.remove('listening');
+      micBtn.textContent = 'Speak';
+      const said = finalTranscript.trim() || input.value.trim();
+      finalTranscript = '';
+      if (said){
+        input.value = '';
+        handleMessage(said);
+      } else {
+        supportEl.textContent = 'No speech was captured — try again, and make sure to speak right after the button turns red.';
+      }
+    });
+
+    r.addEventListener('error', e => {
+      // 'no-speech' just means a brief silent gap — let the 'end' handler's
+      // auto-restart logic handle it rather than treating it as a real failure.
+      if (e.error === 'no-speech' && !stopRequested) return;
+
+      listening = false;
+      stopRequested = true;
+      clearTimers();
+      micBtn.classList.remove('listening');
+      micBtn.textContent = 'Speak';
+      const reasons = {
+        'not-allowed': 'Microphone permission was blocked. Click the padlock/site-settings icon in the address bar and allow microphone access, then try again.',
+        'audio-capture': 'No microphone was found. Check that a mic is connected and not in use by another app.',
+        'network': 'A network error interrupted speech recognition — check your connection and try again.',
+        'aborted': 'Listening was stopped before anything was heard.',
+      };
+      supportEl.textContent = reasons[e.error] || ('Speech recognition error: ' + e.error + '. Typed input still works.');
+    });
+
+    return r;
+  }
+
+  micBtn.addEventListener('click', () => {
+    if (listening) { stopRequested = true; if (recognizer) recognizer.stop(); return; }
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    try {
+      finalTranscript = '';
+      input.value = '';
+      stopRequested = false;
+      listening = true;
+      micBtn.classList.add('listening');
+      micBtn.textContent = 'Listening… (click to stop)';
+      supportEl.textContent = 'Listening — take your time, it\u2019ll wait for a pause before sending.';
+      recognizer = buildRecognizer();
+      recognizer.start();
+      armSilenceTimer();
+      hardStopTimer = setTimeout(() => {
+        stopRequested = true;
+        supportEl.textContent = 'Max listening time reached — processing what was said.';
+        if (recognizer) recognizer.stop();
+      }, MAX_RECORDING_MS);
+    } catch (err) {
+      listening = false;
+      micBtn.classList.remove('listening');
+      micBtn.textContent = 'Speak';
+      supportEl.textContent = 'Could not start listening: ' + err.message;
+    }
+  });
+  supportEl.textContent = 'Voice input/output uses your browser\u2019s built-in speech engine (best supported in Chrome/Edge). Nothing is sent to a server. It listens continuously and waits for a pause before sending.';
+} else {
+  micBtn.classList.add('unsupported');
+  micBtn.textContent = 'Speak (unsupported)';
+  micBtn.disabled = true;
+  supportEl.textContent = 'This browser doesn\u2019t support speech recognition — try Chrome or Edge for the voice input. Typed input and spoken bot replies still work.';
+}
+
+resetCall();
+</script>
+</body>
+</html>
