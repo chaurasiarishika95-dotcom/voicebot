@@ -253,15 +253,27 @@ function handleMessage(raw){
 
 function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
 
+function primeSpeech(){
+  if ('speechSynthesis' in window){
+    // Mobile browsers only allow speechSynthesis to start from a direct user
+    // gesture. Speaking a silent utterance right now "unlocks" audio so the
+    // bot's delayed replies (inside setTimeout) can actually play afterward.
+    const unlock = new SpeechSynthesisUtterance('');
+    unlock.volume = 0;
+    window.speechSynthesis.speak(unlock);
+  }
+}
+
 document.getElementById('send').addEventListener('click', () => {
+  primeSpeech();
   handleMessage(input.value);
   input.value = '';
 });
 input.addEventListener('keydown', e => {
-  if (e.key === 'Enter'){ handleMessage(input.value); input.value=''; }
+  if (e.key === 'Enter'){ primeSpeech(); handleMessage(input.value); input.value=''; }
 });
 document.querySelectorAll('.quick button').forEach(b => {
-  b.addEventListener('click', () => { input.value = b.dataset.txt; handleMessage(input.value); input.value=''; });
+  b.addEventListener('click', () => { primeSpeech(); input.value = b.dataset.txt; handleMessage(input.value); input.value=''; });
 });
 
 document.getElementById('reset').addEventListener('click', resetCall);
@@ -338,6 +350,7 @@ if (!isSecure){
   micBtn.addEventListener('click', () => {
     if (listening) return;
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    primeSpeech();
     try {
       input.value = '';
       listening = true;
