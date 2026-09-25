@@ -33,7 +33,7 @@
 <div class="app">
   <div class="top">
     <div class="brand"><h1>myBiz Voice Travel Agent</h1><p>Voice support for flights & stays • cancellations, rescheduling and refunds</p></div>
-    <div class="badge">VOICE DEMO</div>
+    <div class="badge">VOICE + AI DEMO</div>
   </div>
 
   <div class="grid">
@@ -48,7 +48,19 @@
 
       <div class="identity">
         <div class="field"><label>DEMO CALLER / ROLE</label><select id="identity"></select></div>
-        <div class="field"><label>TEST MESSAGE</label><input id="input" placeholder="Try: Cancel my Hyderabad hotel"></div>
+        <div class="field"><label>TEST MESSAGE</label><input id="input" placeholder="Try: Can you get rid of my Bombay flight?"></div>
+      </div>
+
+      <div class="flowbox" style="margin-top:10px">
+        <b>AI language understanding</b>
+        <div style="margin-top:8px;font-size:12px;color:#566174">Powered by Gemini through the Vercel server-side API. The Gemini API key is stored in Vercel Environment Variables and is never exposed in this page.</div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
+          <select id="geminiModel" style="padding:9px;border:1px solid #d8dee8;border-radius:8px;background:#fff">
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+          </select>
+          <span id="aiStatus" style="font-size:11px;color:#147a42">AI language layer • Vercel server proxy</span>
+        </div>
       </div>
 
       <div id="transcript" class="transcript" style="margin-top:14px"></div>
@@ -487,6 +499,66 @@ function refundInfoFor(b){
 }
 
 function human(message,reason){state.pending=null;state.state="HUMAN";trail("HUMAN",reason);say(message)}
+
+/* =========================
+   OPTIONAL GEMINI LANGUAGE LAYER
+   AI understands natural language; deterministic functions below still control
+   access, policy, fees, refunds, transactions and human handoff.
+   NOTE: a browser API key is visible to the user. Use a server-side proxy in production.
+   ========================= */
+let geminiModel=localStorage.getItem("mybiz_gemini_model")||"gemini-2.5-flash";
+const aiStatusEl=()=>$('aiStatus');
+function updateAIStatus(msg,ok=false){if(aiStatusEl()){aiStatusEl().textContent=msg;aiStatusEl().style.color=ok?"#147a42":"#788298";}}
+function loadAISettings(){
+  $("geminiModel").value=geminiModel;
+  updateAIStatus("AI language layer • Vercel server proxy",true);
+}
+async function geminiUnderstand(text){
+  const caller=state.user;
+  const accessible=accessibleBookings().map(b=>({booking_id:b.pnr,type:b.type,from:b.from||null,to:b.to||null,stay:b.stayName||null,date:b.date,date_label:b.dateLabel||null,status:b.status,traveler:b.traveler,booking_for:b.bookingFor||null,travelers:b.travelers||1}));
+  const prompt=`You are the language-understanding layer for a corporate travel post-sales voice assistant.
+Caller: ${caller.name}; role: ${caller.role}; company: ${caller.company}.
+Only use these accessible booking records to resolve a booking:
+${JSON.stringify(accessible)}
+
+Classify the user's request. Return ONLY valid JSON with these keys:
+intent: one of DETAILS, CANCEL, RESCHEDULE, REFUND, COMPANY_BOOKINGS, UNSUPPORTED
+booking_id: exact accessible booking_id if clearly identified, otherwise null
+booking_type: FLIGHT, STAY, BOTH, or null
+from_city: Bangalore, Delhi, Bombay, Hyderabad, or null
+to_city: Bangalore, Delhi, Bombay, Hyderabad, or null
+stay_city: Bangalore, Delhi, Bombay, Hyderabad, or null
+wants_all: true/false
+confidence: number from 0 to 1
+reason: short explanation
+
+Rules: understand natural language and aliases, but never invent a booking. “cancel/get rid of/drop” can mean CANCEL. “move/change/push” can mean RESCHEDULE. “money back/refund” means REFUND. “what all/my bookings/my flights/my stays” means DETAILS with wants_all=true. Company-wide requests are COMPANY_BOOKINGS.
+User: ${JSON.stringify(text)}`;
+  try{
+    updateAIStatus("AI is understanding the request…");
+    const res=await fetch("/api/gemini",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,model:geminiModel})});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(data.error||`AI service ${res.status}`);
+    const parsed=data?.result;
+    if(!parsed||typeof parsed!=="object")throw new Error("Invalid AI response");
+    updateAIStatus(`AI enabled • understood as ${parsed.intent||"request"}`,true);
+    trail("AUTOMATE",`AI language layer: ${parsed.intent||"UNSUPPORTED"}${parsed.booking_id?` • ${parsed.booking_id}`:""}`);
+    return parsed;
+  }catch(e){
+    updateAIStatus("AI unavailable; deterministic fallback active.");
+    trail("CLARIFY",`AI understanding unavailable; deterministic fallback used (${e.message}).`);
+    return null;
+  }
+}
+function applyAIHints(text,ai){
+  if(!ai)return text;
+  let enriched=text;
+  if(ai.booking_id && BOOKINGS.some(b=>b.pnr===ai.booking_id)) enriched += ` booking reference ${ai.booking_id}`;
+  if(ai.booking_type==="FLIGHT" && !/flight/i.test(enriched)) enriched += " flight";
+  if(ai.booking_type==="STAY" && !/hotel|stay/i.test(enriched)) enriched += " hotel";
+  if(ai.wants_all && !/\ball\b/i.test(enriched)) enriched += " all";
+  return enriched;
+}
 function unsupported(){setFrustration(5);human("I can help with flights, stays, cancellations, rescheduling, and refunds. For anything outside that, I’ll connect you with the travel desk.","Request outside the supported travel-assistance scope.")}
 function intentOf(text){const n=norm(text);
   if(/refund|money back|where.*refund|when.*refund|how much.*get back/.test(n))return "REFUND";
@@ -497,7 +569,7 @@ function intentOf(text){const n=norm(text);
   return "UNSUPPORTED";
 }
 
-function respond(text){
+async function respond(text){
   if(!text.trim())return;userSay(text);const n=norm(text);
   // State-first replies: never restart a flow just because the caller's answer contains a generic word.
   if(state.pending==="CHOOSE"){
@@ -524,11 +596,14 @@ function respond(text){
   if(state.pending==="REFUND_IDENTIFY")return refundInfo(text);
   if(state.pending==="DETAILS_IDENTIFY")return startDetails(text);
 
-  const intent=intentOf(text);state.intent=intent;
-  if(intent==="CANCEL")return startCancellation(text);
-  if(intent==="RESCHEDULE")return startReschedule(text);
-  if(intent==="REFUND")return refundInfo(text);
-  if(intent==="DETAILS")return startDetails(text);
+  const ai=await geminiUnderstand(text);
+  const intent=ai?.intent||intentOf(text);
+  const routedText=applyAIHints(text,ai);
+  state.intent=intent;
+  if(intent==="CANCEL")return startCancellation(routedText);
+  if(intent==="RESCHEDULE")return startReschedule(routedText);
+  if(intent==="REFUND")return refundInfo(routedText);
+  if(intent==="DETAILS")return startDetails(routedText);
   if(intent==="COMPANY_BOOKINGS")return showCompanyBookingsNextMonth();
   return unsupported();
 }
@@ -618,7 +693,9 @@ function startListening(){
 $("start").onclick=startCall;$("end").onclick=endCall;$("mic").onclick=startListening;
 $("mute").onclick=()=>{state.muted=!state.muted;$("mute").textContent=state.muted?"Unmute bot":"Mute bot"};
 $("send").onclick=()=>{const v=$("input").value.trim();if(!v)return;if(!state.active)startCall();$("input").value="";respond(v)};
+$("geminiModel").onchange=()=>{geminiModel=$("geminiModel").value;localStorage.setItem("mybiz_gemini_model",geminiModel);};
 $("input").addEventListener("keydown",e=>{if(e.key==="Enter")$("send").click()});
+loadAISettings();
 USERS.forEach((u,i)=>{const o=document.createElement("option");o.value=i;o.textContent=`${u.name} • ${u.role}`;$("identity").appendChild(o)});
 $("identity").value=0;$("identity").onchange=()=>{state.user=USERS[+$("identity").value];resetSession();uiContext()};
 document.querySelectorAll('.scenario').forEach(x=>x.onclick=()=>{$("input").value=x.dataset.q;$("send").click()});
