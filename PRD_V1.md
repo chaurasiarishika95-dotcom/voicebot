@@ -1,8 +1,8 @@
-# myBiz Voice Travel Agent
+# Voice Travel Agent
 
 ## Product Requirements Document --- V1
 
-**Product area:** myBiz Post-Sales\
+**Product area:** Post-Sales\
 **Product type:** AI-led post-sales voice assistant\
 **Status:** V1 --- Product Thinking & Working Prototype\
 **Author:** Rishika Chaurasia
@@ -10,13 +10,13 @@
 > **Prototype positioning:** Independent product prototype using
 > synthetic corporate travel data. It demonstrates the proposed product
 > approach and automation boundary; it is not positioned as a production
-> myBiz integration.
+> MakeMytrip integration.
 
 ------------------------------------------------------------------------
 
 ## 1. Product Overview
 
-**myBiz Voice Travel Agent** is a bounded conversational AI assistant
+** Voice Travel Agent** is a bounded conversational AI assistant
 for corporate travel post-sales support.
 
 The product is designed to help travellers and corporate bookers handle
