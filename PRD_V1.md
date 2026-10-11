@@ -16,7 +16,7 @@
 
 ## 1. Product Overview
 
-** Voice Travel Agent** is a bounded conversational AI assistant
+**Voice Travel Agent** is a bounded conversational AI assistant
 for corporate travel post-sales support.
 
 The product is designed to help travellers and corporate bookers handle
