@@ -609,7 +609,7 @@ async function respond(text){
   return unsupported();
 }
 
-function startCall(){if(state.active)return;resetSession();state.active=true;$("start").disabled=true;$("end").disabled=false;$("mic").disabled=false;$("mic").textContent="🎙 Speak";$("mute").disabled=false;$("dot").classList.add("live");$("status").textContent="Call in progress — you can speak or type";trail("AUTOMATE","Fresh call started; call state cleared.");say("Hi, welcome to MakeMyTrip. I can help with your flights, hotels, cancellations, rescheduling, or refunds. What would you like to take care of today?")}
+function startCall(){if(state.active)return;resetSession();state.active=true;$("start").disabled=true;$("end").disabled=false;$("mic").disabled=false;$("mic").textContent="🎙 Speak";$("mute").disabled=false;$("dot").classList.add("live");$("status").textContent="Call in progress — you can speak or type";trail("AUTOMATE","Fresh call started; call state cleared.");say("Hi, welcome to My Travel. I can help with your flights, hotels, cancellations, rescheduling, or refunds. What would you like to take care of today?")}
 function endCall(){if(!state.active)return;state.active=false;if(recognition){try{recognition.abort()}catch(e){}}if("speechSynthesis" in window)speechSynthesis.cancel();$("start").disabled=false;$("end").disabled=true;$("mic").disabled=true;$("mic").textContent="🎙 Speak";$("mute").disabled=true;$("dot").classList.remove("live");$("status").textContent="Call ended";$('mic').textContent="🎙 Speak"}
 let recognition=null;
 let listening=false;
