@@ -27,13 +27,28 @@
 .testgrid .scenario{font-size:11px}
 .frustration{padding:4px 0}.fr-num{font-size:32px;font-weight:750}.fr-label{font-size:11px;color:#788298;margin:2px 0 10px}.fr-track{height:9px;background:#edf0f4;border-radius:99px;overflow:hidden}.fr-fill{height:100%;width:0;background:#2f7a5d;border-radius:99px;transition:width .25s ease,background .25s ease}
 .callbar .btn.secondary#mic{min-width:105px}
+
+/* How-to-use panel: hidden until the "How to use" button is clicked */
+.helpbtn{background:#fff;border:1px solid #d8dee8;color:#172033;border-radius:20px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer}
+.helpbtn:hover{background:#f6f8fb}
+.top-right{display:flex;gap:8px;align-items:center}
+.help-scrim{position:fixed;inset:0;background:#0f172a66;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+.help-scrim.on{opacity:1;pointer-events:auto}
+.help{position:fixed;top:0;right:0;height:100%;width:min(460px,100%);background:#fff;z-index:51;transform:translateX(100%);transition:transform .25s ease;overflow-y:auto;padding:22px 24px 32px;font-size:13.5px;line-height:1.55;color:#172033}
+.help.on{transform:none;box-shadow:-16px 0 40px #0f172a2e}
+.help h2{margin:0;font-size:20px}.help h3{font-size:14px;margin:18px 0 6px}
+.help ul,.help ol{margin:0;padding-left:20px}.help li{margin:3px 0}
+.help .x{position:absolute;top:16px;right:16px;border:0;background:#edf1f7;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer}
+.help .tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:5px;margin-right:4px}
+.help .t-auto{background:#e9f7ef;color:#147a42}.help .t-clar{background:#fff4dc;color:#8a5a00}.help .t-hum{background:#fde8e8;color:#a32020}
+.help .note{background:#f8fafc;border:1px solid #e5e9f0;border-radius:9px;padding:10px 12px;margin-top:6px}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="top">
     <div class="brand"><h1>Voice Bot</h1><p>Voice support for flights & stays • cancellations, rescheduling and refunds</p></div>
-    <div class="badge">VOICE + AI DEMO</div>
+    <div class="top-right"><button class="helpbtn" id="helpOpen" aria-controls="helpPanel" aria-expanded="false">ⓘ How to use</button><div class="badge">VOICE + AI DEMO</div></div>
   </div>
 
   <div class="grid">
@@ -105,22 +120,22 @@
 <script>
 /* =========================
    CONTROLLED DEMO DATA
-   Source: mybiz_zomato_flow_testcases.xlsx
+   Source: internal demo test cases (sample data)
    ========================= */
 const USERS=[
-  {id:"ZOM-E01",name:"Aarav Mehta",company:"Zomato",role:"Employee"},
-  {id:"ZOM-E02",name:"Priya Shah",company:"Zomato",role:"Central Booker"}
+  {id:"ABC-E01",name:"Aarav Mehta",company:"ABC Company",role:"Employee"},
+  {id:"ABC-E02",name:"Priya Shah",company:"ABC Company",role:"Central Booker"}
 ];
 const BOOKINGS=[
-  {pnr:"ZOM1001",company:"Zomato",traveler:"ZOM-E01",type:"Flight",from:"BLR",to:"DEL",date:"2026-10-03",stayName:"",room:"Economy",status:"Confirmed",fare:5200,cancelFee:0,refund:5200,payment:"Company Wallet",linkedTrip:""},
-  {pnr:"ZOM1002",company:"Zomato",traveler:"ZOM-E01",type:"Flight",from:"BOM",to:"HYD",date:"2026-10-07",stayName:"",room:"Economy",status:"Confirmed",fare:6100,cancelFee:1500,refund:4600,payment:"Company Wallet",linkedTrip:"HYD"},
-  {pnr:"ZOMH3001",company:"Zomato",traveler:"ZOM-E01",type:"Stay",from:"",to:"",date:"2026-10-07",dateLabel:"7–9 Oct 2026",stayName:"Hyderabad Hotel",room:"Deluxe Room",status:"Confirmed",fare:6000,cancelFee:600,refund:5400,payment:"Company Wallet",linkedTrip:"HYD",linkedFlight:"ZOM1002"},
-  {pnr:"ZOM1003",company:"Zomato",traveler:"ZOM-E02",type:"Flight",from:"DEL",to:"BLR",date:"2026-10-12",stayName:"",room:"Economy",status:"Pending Approval",fare:7800,cancelFee:0,refund:7800,payment:"Company Wallet",linkedTrip:"BLR"},
-  {pnr:"ZOMH3002",company:"Zomato",traveler:"ZOM-E02",type:"Stay",from:"",to:"",date:"2026-10-12",dateLabel:"12–14 Oct 2026",stayName:"Bangalore Hotel",room:"Standard Room",status:"Confirmed",fare:9000,cancelFee:0,refund:9000,payment:"Company Wallet",linkedTrip:"BLR",linkedFlight:"ZOM1003"},
-  {pnr:"ZOM1004",company:"Zomato",traveler:"ZOM-E02",type:"Flight",from:"BLR",to:"BOM",date:"2026-10-18",stayName:"",room:"Business",status:"Confirmed",fare:14500,cancelFee:6000,refund:8500,payment:"Company Wallet",linkedTrip:"",travelers:1},
-  {pnr:"ZOM1005",company:"Zomato",traveler:"ZOM-E01",type:"Flight",from:"DEL",to:"BOM",date:"2026-10-21",stayName:"",room:"Economy",status:"Confirmed",fare:16500,cancelFee:1000,refund:15500,payment:"Company Wallet",linkedTrip:"",travelers:3,bookingFor:"Finance team"},
-  {pnr:"ZOMH3003",company:"Zomato",traveler:"ZOM-E01",type:"Stay",from:"",to:"",date:"2026-10-21",dateLabel:"21–24 Oct 2026",stayName:"Mumbai Hotel",room:"Deluxe Room",status:"Confirmed",fare:18000,cancelFee:1800,refund:16200,payment:"Company Wallet",linkedTrip:"BOM",travelers:5,bookingFor:"Leadership team"},
-  {pnr:"ZOMH3004",company:"Zomato",traveler:"ZOM-E01",type:"Stay",from:"",to:"",date:"2026-10-25",dateLabel:"25–27 Oct 2026",stayName:"Delhi Hotel",room:"Standard Room",status:"Confirmed",fare:12000,cancelFee:0,refund:12000,payment:"Company Wallet",linkedTrip:"DEL",travelers:5,bookingFor:"Sales team"}
+  {pnr:"ABC1001",company:"ABC Company",traveler:"ABC-E01",type:"Flight",from:"BLR",to:"DEL",date:"2026-10-03",stayName:"",room:"Economy",status:"Confirmed",fare:5200,cancelFee:0,refund:5200,payment:"Company Wallet",linkedTrip:""},
+  {pnr:"ABC1002",company:"ABC Company",traveler:"ABC-E01",type:"Flight",from:"BOM",to:"HYD",date:"2026-10-07",stayName:"",room:"Economy",status:"Confirmed",fare:6100,cancelFee:1500,refund:4600,payment:"Company Wallet",linkedTrip:"HYD"},
+  {pnr:"ABCH3001",company:"ABC Company",traveler:"ABC-E01",type:"Stay",from:"",to:"",date:"2026-10-07",dateLabel:"7–9 Oct 2026",stayName:"Hyderabad Hotel",room:"Deluxe Room",status:"Confirmed",fare:6000,cancelFee:600,refund:5400,payment:"Company Wallet",linkedTrip:"HYD",linkedFlight:"ABC1002"},
+  {pnr:"ABC1003",company:"ABC Company",traveler:"ABC-E02",type:"Flight",from:"DEL",to:"BLR",date:"2026-10-12",stayName:"",room:"Economy",status:"Pending Approval",fare:7800,cancelFee:0,refund:7800,payment:"Company Wallet",linkedTrip:"BLR"},
+  {pnr:"ABCH3002",company:"ABC Company",traveler:"ABC-E02",type:"Stay",from:"",to:"",date:"2026-10-12",dateLabel:"12–14 Oct 2026",stayName:"Bangalore Hotel",room:"Standard Room",status:"Confirmed",fare:9000,cancelFee:0,refund:9000,payment:"Company Wallet",linkedTrip:"BLR",linkedFlight:"ABC1003"},
+  {pnr:"ABC1004",company:"ABC Company",traveler:"ABC-E02",type:"Flight",from:"BLR",to:"BOM",date:"2026-10-18",stayName:"",room:"Business",status:"Confirmed",fare:14500,cancelFee:6000,refund:8500,payment:"Company Wallet",linkedTrip:"",travelers:1},
+  {pnr:"ABC1005",company:"ABC Company",traveler:"ABC-E01",type:"Flight",from:"DEL",to:"BOM",date:"2026-10-21",stayName:"",room:"Economy",status:"Confirmed",fare:16500,cancelFee:1000,refund:15500,payment:"Company Wallet",linkedTrip:"",travelers:3,bookingFor:"Finance team"},
+  {pnr:"ABCH3003",company:"ABC Company",traveler:"ABC-E01",type:"Stay",from:"",to:"",date:"2026-10-21",dateLabel:"21–24 Oct 2026",stayName:"Mumbai Hotel",room:"Deluxe Room",status:"Confirmed",fare:18000,cancelFee:1800,refund:16200,payment:"Company Wallet",linkedTrip:"BOM",travelers:5,bookingFor:"Leadership team"},
+  {pnr:"ABCH3004",company:"ABC Company",traveler:"ABC-E01",type:"Stay",from:"",to:"",date:"2026-10-25",dateLabel:"25–27 Oct 2026",stayName:"Delhi Hotel",room:"Standard Room",status:"Confirmed",fare:12000,cancelFee:0,refund:12000,payment:"Company Wallet",linkedTrip:"DEL",travelers:5,bookingFor:"Sales team"}
 ];
 
 const state={listening:false,active:false,muted:false,user:USERS[0],state:"IDLE",intent:"—",booking:"—",decision:"—",pending:null,bookingCandidates:[],selectedBookings:[],selectedBooking:null,frustration:0};
@@ -211,7 +226,7 @@ function exactCandidates(text,{includeCancelled=false}={}){
   if(wantsFlight)hits=hits.filter(b=>b.type==="Flight");
 
   if(state.user.role==="Central Booker") {
-    const personId=/\baarav(?:\s+mehta)?\b/.test(n) ? "ZOM-E01" : (/\bpriya(?:\s+shah)?\b/.test(n) ? "ZOM-E02" : null);
+    const personId=/\baarav(?:\s+mehta)?\b/.test(n) ? "ABC-E01" : (/\bpriya(?:\s+shah)?\b/.test(n) ? "ABC-E02" : null);
     const teamMatch=teamMatchForText(n);
     const travelerCount=travelerCountFromText(n);
 
@@ -452,7 +467,7 @@ function cancellationTargets(text){
 function startCancellation(text){
   state.intent="CANCEL";
   const hits=cancellationTargets(text);
-  if(hits.length===2 && hits.some(b=>b.pnr==="ZOM1002") && hits.some(b=>b.pnr==="ZOMH3001"))return askCancellationForBoth(hits.find(b=>b.pnr==="ZOM1002"),hits.find(b=>b.pnr==="ZOMH3001"));
+  if(hits.length===2 && hits.some(b=>b.pnr==="ABC1002") && hits.some(b=>b.pnr==="ABCH3001"))return askCancellationForBoth(hits.find(b=>b.pnr==="ABC1002"),hits.find(b=>b.pnr==="ABCH3001"));
   if(hits.length===1)return askCancellationFor(hits[0]);
   if(hits.length>1)return showChoices(hits,"CANCEL");
   const list=upcoming();
@@ -507,7 +522,7 @@ function human(message,reason){state.pending=null;state.state="HUMAN";trail("HUM
    access, policy, fees, refunds, transactions and human handoff.
    NOTE: a browser API key is visible to the user. Use a server-side proxy in production.
    ========================= */
-let geminiModel=localStorage.getItem("mybiz_gemini_model")||"gemini-3.8-flash";
+let geminiModel=localStorage.getItem("voicebot_gemini_model")||"gemini-3.8-flash";
 const aiStatusEl=()=>$('aiStatus');
 function updateAIStatus(msg,ok=false){if(aiStatusEl()){aiStatusEl().textContent=msg;aiStatusEl().style.color=ok?"#147a42":"#788298";}}
 function loadAISettings(){
@@ -694,13 +709,62 @@ function startListening(){
 $("start").onclick=startCall;$("end").onclick=endCall;$("mic").onclick=startListening;
 $("mute").onclick=()=>{state.muted=!state.muted;$("mute").textContent=state.muted?"Unmute bot":"Mute bot"};
 $("send").onclick=()=>{const v=$("input").value.trim();if(!v)return;if(!state.active)startCall();$("input").value="";respond(v)};
-$("geminiModel").onchange=()=>{geminiModel=$("geminiModel").value;localStorage.setItem("mybiz_gemini_model",geminiModel);};
+$("geminiModel").onchange=()=>{geminiModel=$("geminiModel").value;localStorage.setItem("voicebot_gemini_model",geminiModel);};
 $("input").addEventListener("keydown",e=>{if(e.key==="Enter")$("send").click()});
 loadAISettings();
 USERS.forEach((u,i)=>{const o=document.createElement("option");o.value=i;o.textContent=`${u.name} • ${u.role}`;$("identity").appendChild(o)});
 $("identity").value=0;$("identity").onchange=()=>{state.user=USERS[+$("identity").value];resetSession();uiContext()};
 document.querySelectorAll('.scenario').forEach(x=>x.onclick=()=>{$("input").value=x.dataset.q;$("send").click()});
 uiContext();
+</script>
+
+<!-- How-to-use panel (hidden until opened) -->
+<div class="help-scrim" id="helpScrim"></div>
+<aside class="help" id="helpPanel" role="dialog" aria-modal="true" aria-labelledby="helpTitle" aria-hidden="true">
+  <button class="x" id="helpClose" aria-label="Close instructions">✕</button>
+  <h2 id="helpTitle">How to use Voice Bot</h2>
+  <h3>What it is</h3>
+  <p style="margin:0">A demo voice assistant for corporate travel after booking. It looks up flights and hotel stays, explains cancellation fees and refunds, cancels after you confirm, and hands you to a human for anything it shouldn't do alone, such as rescheduling. All bookings are sample data for ABC Company.</p>
+  <h3>Before you start</h3>
+  <ul>
+    <li>Use <b>Chrome or Edge</b> on a laptop for voice. Other browsers may only support typing.</li>
+    <li>When asked, <b>allow microphone access</b>.</li>
+    <li>Turn your volume up: the bot speaks its replies.</li>
+  </ul>
+  <h3>Steps</h3>
+  <ol>
+    <li><b>Pick a demo caller</b> under "Demo caller / role":<br><b>Aarav Mehta (Employee)</b> sees only his own bookings.<br><b>Priya Shah (Central Booker)</b> can manage bookings for others.</li>
+    <li><b>Click "Start call".</b> The status dot turns green.</li>
+    <li><b>Talk or type.</b> Press <b>🎙 Speak</b> and talk naturally, or type in the box and press <b>Send</b>.</li>
+    <li><b>Follow the bot's questions.</b> It may ask which booking you mean, or ask you to confirm.</li>
+    <li><b>Click "End call"</b> when you're done. Use <b>Mute bot</b> to stop it speaking aloud.</li>
+  </ol>
+  <h3>Things to try</h3>
+  <ul>
+    <li>"What all bookings do I have?"</li>
+    <li>"Show my flights" or "Show my stays"</li>
+    <li>"Cancel my Hyderabad flight": it states the fee and refund and asks you to confirm first.</li>
+    <li>"Reschedule my Hyderabad flight to next week": it passes you to the travel desk.</li>
+    <li>"Can you get rid of my Bombay flight?": shows it understands everyday phrasing.</li>
+    <li>Or click any <b>Quick test scenario</b> button.</li>
+  </ul>
+  <h3>What the right-hand panels show</h3>
+  <ul>
+    <li><b>Call context:</b> who's calling, their role, what they want, the current step, the booking found, and the bot's decision.</li>
+    <li><b>Frustration score:</b> 0 to 100. It rises when the bot has to repeat itself, or when you disagree with a fee.</li>
+    <li><b>Decision trail:</b> each step with its reason, tagged <span class="tag t-auto">AUTOMATE</span> bot handled it, <span class="tag t-clar">CLARIFY</span> bot asked a question, or <span class="tag t-hum">HUMAN</span> handed to a person.</li>
+  </ul>
+  <h3>Good to know</h3>
+  <div class="note">It never cancels without your confirmation. Rescheduling, requests outside travel, and access it isn't allowed are passed to a human. Bookings, fares and refunds are invented for the demo.</div>
+</aside>
+<script>
+(function(){
+  const panel=document.getElementById("helpPanel"),scrim=document.getElementById("helpScrim"),btn=document.getElementById("helpOpen"),x=document.getElementById("helpClose");
+  function open(){panel.classList.add("on");scrim.classList.add("on");panel.setAttribute("aria-hidden","false");btn.setAttribute("aria-expanded","true");x.focus();}
+  function close(){panel.classList.remove("on");scrim.classList.remove("on");panel.setAttribute("aria-hidden","true");btn.setAttribute("aria-expanded","false");btn.focus();}
+  btn.addEventListener("click",open);x.addEventListener("click",close);scrim.addEventListener("click",close);
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&panel.classList.contains("on"))close();});
+})();
 </script>
 </body>
 </html>
