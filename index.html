@@ -3,55 +3,61 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Voice Bot</title>
+<title>Travel Desk Voice Assistant</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f4f7fb;color:#172033}
-.app{max-width:1280px;margin:0 auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}
+.app{max-width:1280px;margin:0 auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px;flex-wrap:wrap}
 .brand h1{margin:0;font-size:25px}.brand p{margin:5px 0 0;color:#68738a;font-size:13px}
-.badge{background:#e9f7ef;color:#147a42;border:1px solid #bfe7cf;padding:7px 11px;border-radius:20px;font-size:12px;font-weight:700}
-.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}.card{background:#fff;border:1px solid #e2e7ef;border-radius:14px;box-shadow:0 4px 18px #1b2a3a0b}.pad{padding:18px}
-.callbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.btn{border:0;border-radius:9px;padding:10px 15px;font-weight:700;cursor:pointer}.primary{background:#172033;color:#fff}.secondary{background:#edf1f7;color:#172033}.danger{background:#fff0f0;color:#a33}.btn:disabled{opacity:.45;cursor:not-allowed}
-.status{display:flex;align-items:center;gap:8px;font-size:13px;color:#68738a}.dot{width:9px;height:9px;border-radius:50%;background:#b6bfcc}.dot.live{background:#18a957}
-.identity{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.field label{display:block;font-size:11px;font-weight:700;color:#68738a;margin-bottom:5px}.field select,.field input{width:100%;padding:10px;border:1px solid #d8dee8;border-radius:8px;background:#fff}
-.transcript{height:430px;overflow:auto;border:1px solid #e4e8ef;border-radius:10px;padding:12px;background:#fbfcfe}.msg{margin:8px 0;display:flex}.bubble{max-width:82%;padding:10px 12px;border-radius:11px;white-space:pre-line;font-size:14px;line-height:1.45}.bot{background:#edf4ff}.user{margin-left:auto;background:#172033;color:#fff}.system{font-size:11px;color:#7a8496;text-align:center;margin:10px}
-.inputrow{display:flex;gap:8px;margin-top:10px}.inputrow input{flex:1;padding:12px;border:1px solid #d8dee8;border-radius:9px}
-.context{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kv{border:1px solid #e6eaf0;border-radius:9px;padding:10px}.kv small{display:block;color:#788298;font-size:10px;text-transform:uppercase;font-weight:700}.kv b{font-size:13px}
-.decision{height:330px;overflow:auto}.dec{border-left:4px solid #b7c0cf;padding:8px 10px;margin:7px 0;background:#fafbfc;border-radius:5px;font-size:12px}.dec.auto{border-left-color:#18a957}.dec.clarify{border-left-color:#e0a11a}.dec.human{border-left-color:#d24b4b}
-.scenarios{display:grid;grid-template-columns:1fr 1fr;gap:8px}.scenario{padding:10px;border:1px solid #dfe5ee;border-radius:8px;font-size:12px;cursor:pointer;background:#fff}.scenario:hover{background:#f6f8fb}
-.rules{font-size:12px;line-height:1.55;color:#59647a}.rules strong{color:#172033}
+.badge{background:#fff7e6;color:#8a5a00;border:1px solid #f3d9a4;padding:7px 11px;border-radius:20px;font-size:12px;font-weight:700}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}.grid.solo{grid-template-columns:1fr;max-width:820px;margin:0 auto}.grid.solo #console{display:none}
+.card{background:#fff;border:1px solid #e2e7ef;border-radius:14px;box-shadow:0 4px 18px #1b2a3a0b}.pad{padding:18px}
+.callbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.btn{border:0;border-radius:9px;padding:10px 15px;font-weight:700;cursor:pointer;font:inherit;font-weight:700}.primary{background:#172033;color:#fff}.secondary{background:#edf1f7;color:#172033}.danger{background:#fff0f0;color:#a33}.btn:disabled{opacity:.45;cursor:not-allowed}
+.status{display:flex;align-items:center;gap:8px;font-size:13px;color:#68738a}.dot{width:9px;height:9px;border-radius:50%;background:#b6bfcc;flex:none}.dot.live{background:#18a957}
+.options{margin-top:14px;display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:end}.field label{display:block;font-size:11px;font-weight:700;color:#68738a;margin-bottom:5px;text-transform:uppercase}.field select{width:100%;padding:10px;border:1px solid #d8dee8;border-radius:8px;background:#fff;font:inherit;font-size:14px}
+.toggle{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:10px 4px;cursor:pointer;white-space:nowrap}.toggle input{width:16px;height:16px}
+.transcript{height:430px;overflow:auto;border:1px solid #e4e8ef;border-radius:10px;padding:12px;background:#fbfcfe}.msg{margin:8px 0;display:flex}.bubble{max-width:82%;padding:10px 12px;border-radius:11px;white-space:pre-line;font-size:14px;line-height:1.45}.bot{background:#edf4ff}.bot.pending{color:#788298}.user{margin-left:auto;background:#172033;color:#fff}
+.inputrow{display:flex;gap:8px;margin-top:10px}.inputrow input{flex:1;min-width:0;padding:12px;border:1px solid #d8dee8;border-radius:9px;font:inherit;font-size:14px}
+.hint{font-size:11px;color:#788298;margin-top:6px}
+.scenarios{display:grid;grid-template-columns:1fr 1fr;gap:7px}.scenario{padding:9px 10px;border:1px solid #dfe5ee;border-radius:8px;font-size:12px;cursor:pointer;background:#fff;text-align:left;font-family:inherit;color:#172033}.scenario:hover{background:#f6f8fb}.scenario small{display:block;color:#788298;font-size:11px;margin-top:2px}
+.console-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:10px;margin:0 2px 10px}.console-head h2{margin:0;font-size:16px}.console-head span{font-size:11.5px;color:#788298}
+#console .card+.card{margin-top:14px}#console h3{margin:0 0 12px;font-size:14px}
+.context{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kv{border:1px solid #e6eaf0;border-radius:9px;padding:9px 10px;min-width:0}.kv small{display:block;color:#788298;font-size:10px;text-transform:uppercase;font-weight:700}.kv b{font-size:13px;overflow-wrap:anywhere}
+.ai-line{font-size:11.5px;color:#68738a;margin-top:10px}
+.fr-row{display:flex;align-items:baseline;gap:10px}.fr-num{font-size:30px;font-weight:750}.fr-label{font-size:11px;color:#788298}
+.fr-track{position:relative;height:9px;background:#edf0f4;border-radius:99px;margin:8px 0 4px}.fr-fill{height:100%;width:0;background:#2f7a5d;border-radius:99px;transition:width .25s ease,background .25s ease}
+.fr-mark{position:absolute;top:-3px;width:2px;height:15px;background:#9aa4b5}.fr-scale{position:relative;height:14px;font-size:10px;color:#788298}.fr-scale span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.causes{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.cause{font-size:11px;background:#fff4dc;color:#7a5200;border-radius:6px;padding:3px 7px}
+.ticket{font-size:12.5px;line-height:1.45}.ticket .row{display:grid;grid-template-columns:118px 1fr;gap:8px;padding:5px 0;border-top:1px solid #eef1f5}.ticket .row:first-child{border-top:0}.ticket .row b{color:#566174;font-weight:600}
+.ticket details{margin-top:8px}.ticket pre{white-space:pre-wrap;font-size:11px;background:#f6f8fb;border-radius:8px;padding:8px;max-height:220px;overflow:auto}
+.outcome{font-size:12.5px}.outcome .big{font-size:15px;font-weight:700;margin-bottom:6px}.outcome .ok{color:#147a42}.outcome .ho{color:#a32020}.outcome .mid{color:#8a5a00}
+.decision{max-height:300px;overflow:auto}.dec{border-left:4px solid #b7c0cf;padding:8px 10px;margin:7px 0;background:#fafbfc;border-radius:5px;font-size:12px}.dec.automate{border-left-color:#18a957}.dec.clarify{border-left-color:#e0a11a}.dec.human{border-left-color:#d24b4b}
+.legend{font-size:11px;color:#68738a;margin:-6px 0 6px}.tag{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px}.t-auto{background:#e9f7ef;color:#147a42}.t-clar{background:#fff4dc;color:#8a5a00}.t-hum{background:#fde8e8;color:#a32020}
+.helpbtn{background:#fff;border:1px solid #d8dee8;color:#172033;border-radius:20px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.helpbtn:hover{background:#f6f8fb}
+.top-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 @media(max-width:900px){.grid{grid-template-columns:1fr}.transcript{height:360px}}
-
-.flowbox{font-size:12px;line-height:1.55;color:#59647a;background:#f8fafc;border:1px solid #e5e9f0;border-radius:9px;padding:11px;margin-top:10px}
-.flowbox b{color:#172033}
-.testgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.testgrid .scenario{font-size:11px}
-.frustration{padding:4px 0}.fr-num{font-size:32px;font-weight:750}.fr-label{font-size:11px;color:#788298;margin:2px 0 10px}.fr-track{height:9px;background:#edf0f4;border-radius:99px;overflow:hidden}.fr-fill{height:100%;width:0;background:#2f7a5d;border-radius:99px;transition:width .25s ease,background .25s ease}
-.callbar .btn.secondary#mic{min-width:105px}
+@media(max-width:560px){.app{padding:16px}.options{grid-template-columns:1fr 1fr}.options .toggle{grid-column:1/-1;padding:2px 4px}.scenarios{grid-template-columns:1fr}.brand h1{font-size:21px}.ticket .row{grid-template-columns:1fr;gap:2px}}
 
 /* How-to-use panel: hidden until the "How to use" button is clicked */
-.helpbtn{background:#fff;border:1px solid #d8dee8;color:#172033;border-radius:20px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer}
-.helpbtn:hover{background:#f6f8fb}
-.top-right{display:flex;gap:8px;align-items:center}
 .help-scrim{position:fixed;inset:0;background:#0f172a66;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
 .help-scrim.on{opacity:1;pointer-events:auto}
-.help{position:fixed;top:0;right:0;height:100%;width:min(460px,100%);background:#fff;z-index:51;transform:translateX(100%);transition:transform .25s ease;overflow-y:auto;padding:22px 24px 32px;font-size:13.5px;line-height:1.55;color:#172033}
+.help{position:fixed;top:0;right:0;height:100%;width:min(480px,100%);background:#fff;z-index:51;transform:translateX(100%);transition:transform .25s ease;overflow-y:auto;padding:22px 24px 32px;font-size:13.5px;line-height:1.55;color:#172033}
 .help.on{transform:none;box-shadow:-16px 0 40px #0f172a2e}
 .help h2{margin:0;font-size:20px}.help h3{font-size:14px;margin:18px 0 6px}
 .help ul,.help ol{margin:0;padding-left:20px}.help li{margin:3px 0}
 .help .x{position:absolute;top:16px;right:16px;border:0;background:#edf1f7;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer}
-.help .tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:5px;margin-right:4px}
-.help .t-auto{background:#e9f7ef;color:#147a42}.help .t-clar{background:#fff4dc;color:#8a5a00}.help .t-hum{background:#fde8e8;color:#a32020}
 .help .note{background:#f8fafc;border:1px solid #e5e9f0;border-radius:9px;padding:10px 12px;margin-top:6px}
+.help table{border-collapse:collapse;width:100%;font-size:12.5px}.help td,.help th{border-top:1px solid #e5e9f0;padding:5px 6px;text-align:left;vertical-align:top}.help th{font-size:11px;color:#68738a;text-transform:uppercase}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="top">
-    <div class="brand"><h1>Voice Bot</h1><p>Voice support for flights & stays • cancellations, rescheduling and refunds</p></div>
-    <div class="top-right"><button class="helpbtn" id="helpOpen" aria-controls="helpPanel" aria-expanded="false">ⓘ How to use</button><div class="badge">VOICE + AI DEMO</div></div>
+    <div class="brand"><h1>Travel Desk Voice Assistant</h1><p>Post-booking help for corporate travellers: bookings, cancellations, date changes and refunds</p></div>
+    <div class="top-right"><button class="helpbtn" id="consoleToggle" aria-pressed="true">Hide agent console</button><button class="helpbtn" id="helpOpen" aria-controls="helpPanel" aria-expanded="false">ⓘ How to use</button><div class="badge">PROTOTYPE · SAMPLE DATA</div></div>
   </div>
 
-  <div class="grid">
+  <div class="grid" id="grid">
     <section class="card pad">
       <div class="callbar">
         <button class="btn primary" id="start">Start call</button>
@@ -61,55 +67,65 @@
         <div class="status"><span id="dot" class="dot"></span><span id="status">Call not started</span></div>
       </div>
 
-      <div class="identity">
-        <div class="field"><label>DEMO CALLER / ROLE</label><select id="identity"></select></div>
-        <div class="field"><label>TEST MESSAGE</label><input id="input" placeholder="Try: Can you get rid of my Bombay flight?"></div>
+      <div class="options">
+        <div class="field"><label for="identity">Calling as</label><select id="identity"></select></div>
+        <div class="field"><label for="lang">Language</label><select id="lang"><option value="en">English (India)</option><option value="hinglish">Hinglish</option></select></div>
+        <label class="toggle" title="The bot listens again by itself after it finishes speaking"><input type="checkbox" id="handsfree"> Hands-free</label>
       </div>
 
-      <div class="flowbox" style="margin-top:10px">
-        <b>AI language understanding</b>
-        <div style="margin-top:8px;font-size:12px;color:#566174">Powered by Gemini through the Vercel server-side API. The Gemini API key is stored in Vercel Environment Variables and is never exposed in this page.</div>
-        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
-          <select id="geminiModel" style="padding:9px;border:1px solid #d8dee8;border-radius:8px;background:#fff">
-            <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (default)</option><option value="gemini-3.5-flash">Gemini 3.5 Flash</option><option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
-          </select>
-          <span id="aiStatus" style="font-size:11px;color:#147a42">AI language layer • Vercel server proxy</span>
-        </div>
-      </div>
+      <div id="transcript" class="transcript" style="margin-top:14px" aria-live="polite"></div>
+      <div class="inputrow"><input id="input" placeholder="Type here, or press Speak and talk" aria-label="Message"><button class="btn primary" id="send">Send</button></div>
+      <div class="hint">Voice works in Chrome or Edge. Say "agent" at any time to reach the travel desk.</div>
 
-      <div id="transcript" class="transcript" style="margin-top:14px"></div>
-      <div class="inputrow"><button class="btn primary" id="send">Send</button><span style="font-size:11px;color:#788298;align-self:center">You can type or press <b>Speak</b> and talk naturally.</span></div>
-
-      <h3 style="margin:18px 0 10px;font-size:14px">Quick test scenarios</h3>
-      <div class="testgrid">
-        <div class="scenario" data-q="What all bookings do I have?">1 • Show all my bookings</div>
-        <div class="scenario" data-q="What all flights do I have?">2 • Show all my flights</div>
-        <div class="scenario" data-q="What all stays do I have?">3 • Show all my stays</div>
-        <div class="scenario" data-q="Cancel my Hyderabad flight">4 • Cancel my flight</div>
-        <div class="scenario" data-q="Reschedule my Hyderabad flight to next week">5 • Reschedule my flight</div>
+      <h3 style="margin:18px 0 10px;font-size:14px">Try these</h3>
+      <div class="scenarios">
+        <button class="scenario" data-q="Move my Hyderabad flight to next week">Move my Hyderabad flight to next week<small>New flights, fare difference, policy check</small></button>
+        <button class="scenario" data-q="Mera Hyderabad wala flight agle hafte kar do">Mera Hyderabad wala flight agle hafte kar do<small>Hinglish</small></button>
+        <button class="scenario" data-q="Cancel my Hyderabad flight">Cancel my Hyderabad flight<small>Then say "the fee is too high"</small></button>
+        <button class="scenario" data-q="Cancel my Delhi flight">Cancel my Delhi flight<small>Refund re-checked before cancelling</small></button>
+        <button class="scenario" data-q="What all bookings do I have?">What all bookings do I have?<small>Read-only lookup</small></button>
+        <button class="scenario" data-q="Where is my refund for the Delhi flight?">Where is my refund for the Delhi flight?<small>Refund status</small></button>
+        <button class="scenario" data-q="This is useless, I want to talk to a real person">This is useless, I want a real person<small>Instant handoff with a ticket</small></button>
+        <button class="scenario" data-q="Show company bookings for next month" data-user="1">Show company bookings for next month<small>Switches to the Central Booker</small></button>
       </div>
     </section>
 
-    <aside>
+    <aside id="console" aria-label="Agent console">
+      <div class="console-head"><h2>Agent console</h2><span>Internal view for the travel desk. Callers don't see this.</span></div>
       <section class="card pad">
-        <h3 style="margin:0 0 12px;font-size:15px">Call context</h3>
+        <h3>Call context</h3>
         <div class="context">
           <div class="kv"><small>Caller</small><b id="cCaller">—</b></div>
           <div class="kv"><small>Role</small><b id="cRole">—</b></div>
           <div class="kv"><small>Intent</small><b id="cIntent">—</b></div>
-          <div class="kv"><small>State</small><b id="cState">IDLE</b></div>
+          <div class="kv"><small>Step</small><b id="cState">IDLE</b></div>
           <div class="kv"><small>Booking</small><b id="cBooking">—</b></div>
-          <div class="kv"><small>Decision</small><b id="cDecision">—</b></div>
+          <div class="kv"><small>Last decision</small><b id="cDecision">—</b></div>
         </div>
+        <div class="ai-line" id="aiStatus">Language understanding: Gemini, with a rule-based fallback</div>
       </section>
 
-      <section class="card pad" style="margin-top:16px">
-        <h3 style="margin:0 0 12px;font-size:15px">Frustration score</h3>
-        <div class="frustration"><div class="fr-num" id="frNum">0</div><div class="fr-label">0 = calm • 100 = highly frustrated</div><div class="fr-track"><div id="frFill" class="fr-fill"></div></div></div>
+      <section class="card pad">
+        <h3>Frustration score</h3>
+        <div class="fr-row"><div class="fr-num" id="frNum">0</div><div class="fr-label">At 50 the bot offers a person. At 75 it hands over automatically.</div></div>
+        <div class="fr-track"><div id="frFill" class="fr-fill"></div><i class="fr-mark" style="left:50%"></i><i class="fr-mark" style="left:75%"></i></div>
+        <div class="fr-scale"><span style="left:50%">offer agent</span><span style="left:75%">auto handoff</span></div>
+        <div class="causes" id="frCauses"></div>
       </section>
 
-      <section class="card pad" style="margin-top:16px">
-        <h3 style="margin:0 0 12px;font-size:15px">Decision trail</h3>
+      <section class="card pad" id="ticketCard" hidden>
+        <h3>Handoff ticket</h3>
+        <div class="ticket" id="ticket"></div>
+      </section>
+
+      <section class="card pad">
+        <h3>Call outcome</h3>
+        <div class="outcome" id="outcome"><div class="big mid">No call yet</div></div>
+      </section>
+
+      <section class="card pad">
+        <h3>Decision trail</h3>
+        <div class="legend"><span class="tag t-auto">AUTOMATE</span> bot did it · <span class="tag t-clar">CLARIFY</span> bot asked · <span class="tag t-hum">HUMAN</span> passed to a person</div>
         <div id="decisions" class="decision"></div>
       </section>
     </aside>
@@ -118,8 +134,7 @@
 
 <script>
 /* =========================
-   CONTROLLED DEMO DATA
-   Source: internal demo test cases (sample data)
+   SAMPLE DATA (demo only)
    ========================= */
 const USERS=[
   {id:"ABC-E01",name:"Aarav Mehta",company:"ABC Company",role:"Employee"},
@@ -137,7 +152,7 @@ const BOOKINGS=[
   {pnr:"ABCH3004",company:"ABC Company",traveler:"ABC-E01",type:"Stay",from:"",to:"",date:"2026-10-25",dateLabel:"25–27 Oct 2026",stayName:"Delhi Hotel",room:"Standard Room",status:"Confirmed",fare:12000,cancelFee:0,refund:12000,payment:"Company Wallet",linkedTrip:"DEL",travelers:5,bookingFor:"Sales team"}
 ];
 
-const state={listening:false,active:false,muted:false,user:USERS[0],state:"IDLE",intent:"—",booking:"—",decision:"—",pending:null,bookingCandidates:[],selectedBookings:[],selectedBooking:null,frustration:0};
+const state={listening:false,active:false,muted:false,user:USERS[0],state:"IDLE",intent:"—",booking:"—",decision:"—",pending:null,bookingCandidates:[],selectedBookings:[],selectedBooking:null,frustration:0,lang:"en",handsFree:false,causes:{},peak:0,facts:[],actions:[],turns:0};
 const $=id=>document.getElementById(id);
 const norm=s=>String(s||"").toLowerCase().replace(/[’']/g,"").replace(/\s+/g," ").trim();
 const money=n=>"₹"+Number(n||0).toLocaleString("en-IN");
@@ -147,7 +162,12 @@ const aliases={bangalore:"BLR",bengaluru:"BLR",blr:"BLR",delhi:"DEL",del:"DEL",m
 const cityNames={BLR:"Bangalore",DEL:"Delhi",BOM:"Bombay",HYD:"Hyderabad"};
 const cityName=c=>cityNames[c]||c;
 function spokenRoute(b){return `${cityName(b.from)} to ${cityName(b.to)}`;}
-function codeHits(text){const n=norm(text);return [...new Set(Object.entries(aliases).filter(([w])=>n.includes(w)).map(([,c])=>c))]}
+function codeHits(text){
+  // Cities in the order the caller said them, so "Delhi to Bangalore" is DEL then BLR.
+  const n=norm(text),found=[];
+  Object.entries(aliases).forEach(([w,c])=>{const m=n.match(new RegExp("\\b"+w));if(m)found.push([m.index,c])});
+  return [...new Set(found.sort((a,b)=>a[0]-b[0]).map(x=>x[1]))];
+}
 function hasCompanyAccess(){return state.user.role==="Central Booker"}
 function accessibleBookings(includeCancelled=false){
   // Access rule: Employee sees only their own direct bookings.
@@ -285,6 +305,89 @@ function uiContext(){
   $("cCaller").textContent=state.user.name;$("cRole").textContent=state.user.role;
   $("cIntent").textContent=state.intent;$("cState").textContent=state.state;$("cBooking").textContent=state.booking;$("cDecision").textContent=state.decision;
 }
+
+/* =========================
+   FARE RULES, TRAVEL POLICY AND DEMO CLOCK (sample data)
+   ========================= */
+const DEMO_TODAY="2026-09-24";
+const POLICY={company:"ABC Company",extraLimitPerTraveller:3000};
+const FARE_RULES={
+  ABC1001:{changeFee:0,feeRule:"this is a flexi fare, so the airline charges no cancellation or date-change fee",recheck:{refund:4950,why:"the airline has added a ₹250 non-refundable convenience fee"}},
+  ABC1002:{changeFee:750,feeRule:"this is a saver fare: the airline charges ₹1,500 to cancel, or ₹750 to change the date plus any fare difference"},
+  ABCH3001:{changeFee:0,feeRule:"the hotel keeps 10% of the booking (₹600) on cancellation; date changes are free and you only pay any rate difference"},
+  ABC1003:{changeFee:0,feeRule:"this is a flexi fare with no cancellation fee"},
+  ABCH3002:{changeFee:0,feeRule:"the company's hotel rate has free cancellation"},
+  ABC1004:{changeFee:3000,feeRule:"this business fare charges ₹6,000 to cancel, or ₹3,000 to change the date plus any fare difference"},
+  ABC1005:{changeFee:1500,feeRule:"this group fare charges ₹1,000 to cancel, or ₹500 per traveller to change the date plus any fare difference"},
+  ABCH3003:{changeFee:0,feeRule:"the hotel keeps 10% of the booking (₹1,800) on cancellation; date changes are free and you only pay any rate difference"},
+  ABCH3004:{changeFee:0,feeRule:"the company's hotel rate has free cancellation"}
+};
+BOOKINGS.forEach(b=>Object.assign(b,FARE_RULES[b.pnr]||{changeFee:0,feeRule:"standard fare rules apply"}));
+
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const keyUTC=k=>{const[y,m,d]=k.split("-").map(Number);return Date.UTC(y,m-1,d)};
+function addDays(key,n){return new Date(keyUTC(key)+n*864e5).toISOString().slice(0,10)}
+function daysBetween(a,b){return Math.round((keyUTC(b)-keyUTC(a))/864e5)}
+function shortDate(k){const[,m,d]=k.split("-").map(Number);return `${d} ${MONTHS[m-1]}`}
+function stayNights(b){const m=String(b.dateLabel||"").match(/(\d+)\s*[–-]\s*(\d+)/);return m?Math.max(1,+m[2]-+m[1]):1}
+function stayLabel(start,nights){const end=addDays(start,nights);const[ys,ms,ds]=start.split("-").map(Number);const[ye,me,de]=end.split("-").map(Number);return ms===me?`${ds}–${de} ${MONTHS[ms-1]} ${ys}`:`${ds} ${MONTHS[ms-1]} – ${de} ${MONTHS[me-1]} ${ye}`}
+function seeded(s){let h=7;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return (h%1000)/1000}
+const FLIGHT_MINUTES={"BOM-HYD":85,"HYD-BOM":85,"BLR-DEL":165,"DEL-BLR":170,"BLR-BOM":105,"BOM-BLR":100,"DEL-BOM":130,"BOM-DEL":135};
+function addMinutes(t,mins){const[h,m]=t.split(":").map(Number);const x=h*60+m+mins;return `${String(Math.floor(x/60)%24).padStart(2,"0")}:${String(x%60).padStart(2,"0")}`}
+function dateKeysFromText(text){
+  const n=norm(text),out=[];
+  const mon="(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t|tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)";
+  const re=new RegExp(`\\b\\d{1,2}(?:st|nd|rd|th)?[ -]${mon}(?:[ ,]*20\\d{2})?\\b|\\b${mon}[ -]\\d{1,2}(?:st|nd|rd|th)?(?:[ ,]*20\\d{2})?\\b`,"g");
+  for(const m of n.matchAll(re)){const k=dateKeyFromText(m[0]);if(k)out.push(k)}
+  return out;
+}
+function stripDates(text){
+  const mon="(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t|tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)";
+  return norm(text).replace(new RegExp(`\\b\\d{1,2}(?:st|nd|rd|th)?[ -]${mon}(?:[ ,]*20\\d{2})?\\b|\\b${mon}[ -]\\d{1,2}(?:st|nd|rd|th)?(?:[ ,]*20\\d{2})?\\b`,"g")," ");
+}
+const WORD_NUM={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10};
+function newDateFromText(text,b,ai){
+  const n=norm(text).replace(/\b(one|two|three|four|five|six|seven|eight|nine|ten)\b/g,w=>WORD_NUM[w]);
+  const keys=dateKeysFromText(text).filter(k=>k!==b.date);
+  if(keys.length)return keys[keys.length-1];
+  let m;
+  if(/next week|a week later|week later|by a week|by 1 week|1 week later/.test(n))return addDays(b.date,7);
+  if((m=n.match(/\b(\d+)\s*days?\s*(later|after|ahead|aage)\b/))||(m=n.match(/\bby\s*(\d+)\s*days?\b/)))return addDays(b.date,+m[1]);
+  if((m=n.match(/\b(\d+)\s*days?\s*(earlier|before|early|pehle)\b/)))return addDays(b.date,-m[1]);
+  if(/next day|day after|a day later|1 day later|ek din baad/.test(n))return addDays(b.date,1);
+  if(/day before|a day earlier|1 day earlier|day early|ek din pehle/.test(n))return addDays(b.date,-1);
+  const wd=n.match(/\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/);
+  if(wd){const target=["sunday","monday","tuesday","wednesday","thursday","friday","saturday"].indexOf(wd[1]);
+    const cur=new Date(keyUTC(b.date)).getUTCDay();let diff=target-cur;if(diff>3)diff-=7;if(diff<-3)diff+=7;if(diff===0)diff=7;return addDays(b.date,diff)}
+  if(ai&&/^\d{4}-\d{2}-\d{2}$/.test(ai.new_date||"")&&ai.new_date!==b.date)return ai.new_date;
+  return null;
+}
+
+/* =========================
+   HINGLISH / HINDI CUES
+   The rules below turn common Hindi and Hinglish words into English cues, so the rule-based
+   fallback still works when the AI layer is down. Gemini reads the original words.
+   ========================= */
+const END="(?=[\\s,.!?]|$)";
+const HINGLISH=[
+  [new RegExp("^(?:हां|हाँ|जी हां|जी|ठीक है|haan|han|haa|ha|ji haan|ji|theek hai|thik hai|kar do)"+END),"yes"],
+  [new RegExp("^(?:नहीं|नही|ना|nahi|nahin|na|mat karo)"+END),"no"],
+  [/रद्द|कैंसिल|कैंसल/g,"cancel"],[/फ्लाइट|फ़्लाइट/g,"flight"],[/होटल/g,"hotel"],[/बुकिंग/g,"booking"],[/रिफंड/g,"refund"],
+  [/पैसे वापस|पैसा वापस|paise wapas|paisa wapas|paise vapas|paisa vapas|paise kab/g,"money back"],
+  [/तारीख|tareekh|tarikh/g,"date"],[/आगे कर\S*|aage kar\S*|aage badha\S*/g,"move later"],[/पीछे कर\S*|peeche kar\S*|pehle kar\S*/g,"move earlier"],
+  [/बदल\S*|badal\S*/g,"change"],[/अगले हफ्ते|अगले हफ़्ते|अगले सप्ताह|agle hafte|agle week|next hafte/g,"next week"],
+  [/हैदराबाद/g,"hyderabad"],[/दिल्ली/g,"delhi"],[/मुंबई/g,"mumbai"],[/बॉम्बे|बम्बई/g,"bombay"],[/बैंगलोर|बेंगलुरु|बंगलौर/g,"bangalore"],
+  [/एजेंट/g,"agent"],[/किसी इंसान|insaan se baat|kisi se baat|agent se baat|kisi aadmi se/g,"talk to agent"],
+  [/पहला|पहली|pehla|pehli|pahla/g,"first"],[/दूसरा|दूसरी|dusra|doosra|dusri/g,"second"],[/तीसरा|तीसरी|teesra|tisra/g,"third"],
+  [/दिखाओ|बताओ|dikhao|batao|bata do|dikha do/g,"show"],[/सारी|सारे|saari|saare/g,"all"],
+  [/बकवास|bakwas|bekaar|bekar|faltu|फालतू/g,"useless"],[/सुबह|subah/g,"morning"],[/शाम|shaam|sham/g,"evening"],[/दोपहर|dopahar|dopehar/g,"afternoon"],
+  [/ज़्यादा|ज्यादा|zyada|jyada/g,"too high"],[/kar do|kar dijiye|karna hai|karni hai/g,""]
+];
+function toEnglishCues(text){let t=norm(text);HINGLISH.forEach(([re,to])=>{t=t.replace(re,to)});return t.replace(/\s+/g," ").trim()}
+
+/* =========================
+   VOICE OUTPUT, TRANSCRIPT, TRAIL
+   ========================= */
 let preferredVoice=null;
 function loadVoice(){
   if(!("speechSynthesis" in window))return;
@@ -292,26 +395,129 @@ function loadVoice(){
   preferredVoice=voices.find(v=>/^en-IN/i.test(v.lang))||voices.find(v=>/^en-GB/i.test(v.lang))||voices.find(v=>/^en-US/i.test(v.lang))||voices.find(v=>/^en/i.test(v.lang))||null;
 }
 if("speechSynthesis" in window){loadVoice();speechSynthesis.onvoiceschanged=loadVoice;}
+function scrollT(){$("transcript").scrollTop=$("transcript").scrollHeight}
+let sayChain=Promise.resolve(),rewritesInFlight=0;
 function say(text){
-  const d=document.createElement("div");d.className="msg";d.innerHTML='<div class="bubble bot"></div>';d.querySelector(".bubble").textContent=text;$("transcript").appendChild(d);$("transcript").scrollTop=$("transcript").scrollHeight;
-  if(state.active&&!state.muted&&"speechSynthesis" in window){try{
-    speechSynthesis.cancel();
-    let speechText=String(text)
+  if(state.offerPending&&state.state!=="HUMAN"){text+="\n\nIf you'd rather talk to someone, just say \"agent\".";state.offerPending=false;trail("CLARIFY","Frustration reached 50: offered a person.")}
+  const d=document.createElement("div");d.className="msg";d.innerHTML='<div class="bubble bot"></div>';const bub=d.querySelector(".bubble");
+  $("transcript").appendChild(d);
+  if(state.lang!=="hinglish"){bub.textContent=text;scrollT();speak(text);return}
+  bub.textContent="…";bub.classList.add("pending");scrollT();rewritesInFlight++;
+  sayChain=sayChain.then(()=>toHinglish(text)).then(h=>{bub.textContent=h;bub.classList.remove("pending");bub.title="English: "+text;scrollT();rewritesInFlight--;speak(h)});
+}
+function speak(text){
+  if(!state.active||state.muted||!("speechSynthesis" in window)){afterSpeech();return}
+  try{
+    const speechText=String(text)
       .replace(/\bBLR\b/g,"Bangalore").replace(/\bDEL\b/g,"Delhi").replace(/\bBOM\b/g,"Bombay").replace(/\bHYD\b/g,"Hyderabad")
-      .replace(/MakeMyTrip/g,"Make My Trip")
       .replace(/\s*→\s*/g," to ").replace(/\s*•\s*/g,", ");
     const u=new SpeechSynthesisUtterance(speechText);
     u.lang=preferredVoice?.lang||"en-IN";
     if(preferredVoice)u.voice=preferredVoice;
-    u.rate=.86;u.pitch=1.0;u.volume=1;
+    u.rate=.9;u.pitch=1.0;u.volume=1;
+    u.onend=afterSpeech;
     speechSynthesis.speak(u);
-  }catch(e){}}
+  }catch(e){afterSpeech()}
 }
-function userSay(text){const d=document.createElement("div");d.className="msg";d.innerHTML='<div class="bubble user"></div>';d.querySelector(".bubble").textContent=text;$("transcript").appendChild(d);$("transcript").scrollTop=$("transcript").scrollHeight}
+function afterSpeech(){
+  setTimeout(()=>{
+    if(("speechSynthesis" in window)&&(speechSynthesis.speaking||speechSynthesis.pending))return;
+    if(rewritesInFlight>0)return;
+    if(state.endAfterSpeech){state.endAfterSpeech=false;endCall();return}
+    if(state.handsFree&&state.active&&!listening&&state.state!=="HUMAN")startListening(true);
+  },350);
+}
+function userSay(text){const d=document.createElement("div");d.className="msg";d.innerHTML='<div class="bubble user"></div>';d.querySelector(".bubble").textContent=text;$("transcript").appendChild(d);scrollT()}
 function trail(type,msg){state.decision=type;uiContext();const d=document.createElement("div");d.className="dec "+type.toLowerCase();d.textContent=`${new Date().toLocaleTimeString()} • ${type} • ${msg}`;$("decisions").prepend(d)}
-function setFrustration(delta){state.frustration=Math.max(0,Math.min(100,state.frustration+delta));$("frNum").textContent=state.frustration;$("frFill").style.width=state.frustration+"%";$("frFill").style.background=state.frustration>40?"#b5502e":"#2f7a5d"}
-function resetSession(){state.state="IDLE";state.intent="—";state.booking="—";state.decision="—";state.pending=null;state.bookingCandidates=[];state.selectedBookings=[];state.selectedBooking=null;state.frustration=0;$("frNum").textContent="0";$("frFill").style.width="0%";$("frFill").style.background="#2f7a5d";$("transcript").innerHTML="";$("decisions").innerHTML="";uiContext()}
 
+/* =========================
+   FRUSTRATION SCORE v2 (PRD §7)
+   Every point has a cause code. 50 = offer a person, 75 = automatic handoff.
+   It reads the caller's words and the call's progress, not tone of voice.
+   ========================= */
+const FR_CAUSES={entity_retention_failure:"Repeated themselves",resolution_error:"Bot got it wrong / unclear pick",redundant_clarification:"Bot had to ask again",system_failure:"Voice or system problem",escalation_language:"Angry or escalation words",negative_tone:"Upset wording (AI)",fee_dispute:"Disputed a fee",verbosity:"Interrupted the bot",long_journey:"Call running long"};
+const ESCALATION_RE=/\b(useless|ridiculous|stupid|pathetic|waste of (?:my )?time|nonsense|rubbish|irritat\w*|frustrat\w*|annoying|fed up|what the hell|wtf|already told you|told you already|i just said|again and again|kitni baar)\b/;
+function signal(code,points){
+  state.frustration=Math.max(0,Math.min(100,state.frustration+points));
+  if(points>0){state.causes[code]=(state.causes[code]||0)+points;state.peak=Math.max(state.peak,state.frustration)}
+  renderFrustration();
+}
+function setFrustration(points,code="redundant_clarification"){signal(code,points)}
+function renderFrustration(){
+  const f=state.frustration;$("frNum").textContent=f;$("frFill").style.width=f+"%";
+  $("frFill").style.background=f>=75?"#b3261e":f>=50?"#c77700":"#2f7a5d";
+  $("frCauses").innerHTML="";
+  Object.entries(state.causes).sort((a,b)=>b[1]-a[1]).forEach(([c,p])=>{const s=document.createElement("span");s.className="cause";s.textContent=`${FR_CAUSES[c]||c} +${p}`;$("frCauses").appendChild(s)});
+}
+function thresholdHandoff(){
+  if(state.state==="HUMAN")return false;
+  if(state.frustration>=75){
+    handoff("I'm sorry this has been frustrating. I'm connecting you to the travel desk now, and I'll pass along everything you've told me so you don't have to repeat it.","frustration_threshold",`Frustration score reached ${state.frustration} (${Object.keys(state.causes).join(", ")}); handed over automatically.`);
+    return true;
+  }
+  if(state.frustration>=50&&!state.offeredHuman){state.offeredHuman=true;state.offerPending=true}
+  return false;
+}
+function wantsAgent(n){
+  return /\b(talk|speak|connect|transfer|put me through|give me|get me|want|need)\b.*\b(agent|human|real person|a person|someone|somebody|representative|executive|travel desk|customer care)\b/.test(n)
+    ||/^(agent|human|representative|operator)\b/.test(n)||/\btalk to agent\b/.test(n);
+}
+
+/* =========================
+   HANDOFF TICKET (PRD §8) AND CALL OUTCOME
+   ========================= */
+function handoff(message,code,summary){
+  const prevStep=state.pending||state.state;
+  state.offerPending=false;state.pending=null;state.state="HUMAN";state.outcome={type:"handoff",code};
+  trail("HUMAN",summary);
+  const b=state.selectedBooking;
+  state.ticket={
+    handoff_id:`HO-${DEMO_TODAY.replace(/-/g,"")}-${String(1000+Math.floor(Math.random()*9000))}`,
+    reason_code:code,reason_summary:summary,
+    caller:{name:state.user.name,id:state.user.id,role:state.user.role,company:state.user.company},
+    intent:state.intent,
+    booking:b?{pnr:b.pnr,type:b.type,detail:b.type==="Stay"?`${b.stayName}, ${b.dateLabel}`:`${b.from}-${b.to}, ${b.date}`,status:b.status}:null,
+    facts_shown_to_customer:state.facts.slice(-4),
+    actions_taken:state.actions.slice(),
+    step_at_handoff:prevStep,
+    frustration:{score:state.frustration,causes:Object.keys(state.causes)},
+    customer_told:message
+  };
+  renderTicket();renderOutcome();say(message);
+}
+function human(message,reason,code="other"){return handoff(message,code,reason)}
+function renderTicket(){
+  const t=state.ticket;$("ticketCard").hidden=!t;if(!t)return;
+  const rows=[["Reason",t.reason_code.replace(/_/g," ")],["Summary",t.reason_summary],["Caller",`${t.caller.name} (${t.caller.role})`],
+    ["Booking",t.booking?`${t.booking.pnr}: ${t.booking.detail}`:"None identified"],["Quoted to caller",t.facts_shown_to_customer.join("; ")||"Nothing"],
+    ["Actions taken",t.actions_taken.join("; ")||"None"],["Frustration",`${t.frustration.score}${t.frustration.causes.length?" ("+t.frustration.causes.map(c=>FR_CAUSES[c]||c).join(", ")+")":""}`],["Caller was told",t.customer_told]];
+  $("ticket").innerHTML="";
+  rows.forEach(([k,v])=>{const r=document.createElement("div");r.className="row";r.innerHTML="<b></b><span></span>";r.querySelector("b").textContent=k;r.querySelector("span").textContent=v;$("ticket").appendChild(r)});
+  const det=document.createElement("details");det.innerHTML="<summary>Ticket JSON</summary><pre></pre>";det.querySelector("pre").textContent=JSON.stringify(t,null,2);$("ticket").appendChild(det);
+}
+function resolved(){if(!state.outcome||state.outcome.type!=="handoff")state.outcome={type:"resolved"};renderOutcome()}
+function renderOutcome(){
+  const o=state.outcome,el=$("outcome");
+  if(!state.callStart){el.innerHTML='<div class="big mid">No call yet</div>';return}
+  const secs=Math.round(((state.callEnd||Date.now())-state.callStart)/1000);
+  let head,cls;
+  if(o?.type==="handoff"){head=`Handed to travel desk: ${o.code.replace(/_/g," ")}`;cls="ho"}
+  else if(o?.type==="resolved"){head=state.active?"Resolved by the assistant so far":"Resolved by the assistant";cls="ok"}
+  else{head=state.active?"In progress":(state.turns?"Caller left before it was resolved":"Ended with no request");cls="mid"}
+  el.innerHTML=`<div class="big ${cls}"></div><div></div>`;el.querySelector(".big").textContent=head;
+  el.lastChild.textContent=`${state.turns} caller turn${state.turns===1?"":"s"} · ${secs}s${state.active?" so far":""} · peak frustration ${state.peak} · ${state.actions.length} action${state.actions.length===1?"":"s"} taken`;
+}
+
+function resetSession(){
+  Object.assign(state,{state:"IDLE",intent:"—",booking:"—",decision:"—",pending:null,bookingCandidates:[],selectedBookings:[],selectedBooking:null,frustration:0,
+    causes:{},peak:0,offeredHuman:false,offerPending:false,turns:0,lastUserText:"",facts:[],actions:[],ticket:null,outcome:null,callStart:0,callEnd:0,
+    rescheduleText:"",rescheduleAI:null,rescheduleOptions:[],pickedOption:null,newDate:null,linkedStay:null,disputeExplained:false,silences:0,endAfterSpeech:false});
+  renderFrustration();renderTicket();renderOutcome();$("transcript").innerHTML="";$("decisions").innerHTML="";uiContext();
+}
+
+/* =========================
+   BOOKING LOOKUP
+   ========================= */
 function showChoices(hits,purpose){
   state.bookingCandidates=hits;state.pending="CHOOSE";state.state="BOOKING_LOOKUP";state.intent=purpose;
   const label=purpose==="CANCEL"?"cancel":purpose==="REFUND"?"check":purpose==="RESCHEDULE"?"reschedule":"view";
@@ -320,6 +526,8 @@ function showChoices(hits,purpose){
 }
 function chooseFromList(text){
   const n=norm(text),p=pnrFrom(text);
+  const both=codeHits(n);
+  if(both.length>=2){const f=state.bookingCandidates.filter(b=>b.type==="Flight"&&both.includes(b.from)&&both.includes(b.to));if(f.length===1)return f[0];}
   if(p)return state.bookingCandidates.find(b=>b.pnr===p)||null;
   const ord={first:1,second:2,third:3,fourth:4,fifth:5,sixth:6};
   const w=n.match(/\b(first|second|third|fourth|fifth|sixth)\b/);
@@ -364,10 +572,13 @@ function chooseFromList(text){
 function startDetails(text){
   state.intent="DETAILS";
   const n=norm(text);
+  // A named booking that isn't in the caller's account: never show a different booking instead.
+  if((stayCityName(n)||codeHits(n).length||pnrFrom(text))&&!exactCandidates(text).length&&!/\b(all|what all|list)\b/.test(n)){
+    return human("I couldn't find a booking that matches that in your account. Let me connect you with the travel desk so they can check.","Named booking not found in the caller's accessible bookings; did not show a different booking.","booking_not_found");}
   const pool=accessibleBookings();
   const wantsStay=/hotel|stay|room|accommodation/.test(n);
   const wantsFlight=/flight|fly|airline|plane/.test(n);
-  const asksAll=/\b(all|what all|which|list|show me all|show all|what.*have|what.*booked|bookings? do i have)\b/.test(n);
+  const asksAll=/\b(all|what all|which|list|show me all|show all|what.*have|what.*booked|bookings? do i have|upcoming|flights|stays|hotels|bookings|trips)\b/.test(n);
   const wantsBoth=/flight.*(and|with).*hotel|hotel.*(and|with).*flight|flight.*stay|stay.*flight|both|all.*booking|all.*trip/.test(n);
 
   // Broad inventory questions should be answered directly, not turned into a disambiguation list.
@@ -413,36 +624,28 @@ function showBookingInventory(rows,kind){
   state.booking=rows.map(b=>b.pnr).join(", ");
   state.selectedBooking=null;
   state.state="IDLE";
-  trail("AUTOMATE",`Listed ${rows.length} accessible ${kind} booking record(s).`);
+  trail("AUTOMATE",`Listed ${rows.length} accessible ${kind} booking record(s).`);resolved();
   const summary=kind==="booking"?`You have ${rows.length} accessible bookings: ${flights} flight${flights===1?'':'s'} and ${stays} stay${stays===1?'':'s'}.`:`You have ${rows.length} ${label}.`;
   say(summary+"\n\n"+rows.map((b,i)=>`${i+1}. ${formatShort(b)}`).join("\n"));
 }
 function showDetails(b){
-  state.selectedBooking=b;state.booking=b.pnr;state.pending=null;state.state="IDLE";trail("AUTOMATE",`Read-only booking details for ${b.pnr}.`);
+  state.selectedBooking=b;state.booking=b.pnr;state.pending=null;state.state="IDLE";trail("AUTOMATE",`Read-only booking details for ${b.pnr}.`);resolved();signal("progress",-10);
   say(`Here are the details for ${b.pnr}: ${formatDetail(b)}`);
 }
 function showCompanyBookingsNextMonth(){
   state.intent="COMPANY_BOOKINGS";
   if(!canViewCompanyBookings()){
-    return human("I can share your own bookings, but company-wide booking details need Central Booker access. Let me get you to the travel desk so they can help.","Employee requested company-wide booking data without company-level access.");
+    return human("I can share your own bookings, but company-wide booking details need Central Booker access. Let me get you to the travel desk so they can help.","Employee asked for company-wide booking data without company-level access.","access_denied");
   }
   const rows=nextMonthBookings();
   if(!rows.length){state.state="IDLE";trail("AUTOMATE","Company booking lookup returned no next-month records.");return say("I don't have any upcoming company bookings for next month in the available records.");}
   const total=rows.reduce((s,b)=>s+b.fare,0);
   const travelers=rows.reduce((sum,b)=>sum+(b.travelers||1),0);
   const lines=rows.map((b,i)=>`${i+1}. ${formatShort(b)}`);
-  state.state="IDLE";state.booking=rows.map(b=>b.pnr).join(", ");trail("AUTOMATE",`Company-wide next-month booking lookup returned ${rows.length} records.`);
+  state.state="IDLE";state.booking=rows.map(b=>b.pnr).join(", ");trail("AUTOMATE",`Company-wide next-month booking lookup returned ${rows.length} records.`);resolved();
   say(`Sure. I found ${rows.length} company bookings for next month, covering ${travelers} travellers, with a total booking value of ${money(total)}.\n\n${lines.join("\n")}`);
 }
 
-function cancellationPrompt(){return "Before I cancel this booking, has your travel plan changed and would you like to reschedule instead? You can say yes or no."}
-function refundSentence(b){return `The cancellation fee is ${money(b.cancelFee)}, so you’d get ${money(b.refund)} back.`}
-function askCancellationFor(b){
-  state.selectedBookings=[b];state.selectedBooking=b;state.booking=b.pnr;state.pending="CANCEL_RESCHEDULE";state.state="CANCELLATION";trail("CLARIFY",`Identified ${b.pnr} for cancellation; one reschedule check.`);say(cancellationPrompt());
-}
-function askCancellationForBoth(a,b){
-  state.selectedBookings=[a,b];state.selectedBooking=a;state.booking=`${a.pnr} + ${b.pnr}`;state.pending="CANCEL_RESCHEDULE";state.state="CANCELLATION";trail("CLARIFY",`Identified ${a.pnr} and ${b.pnr} for one combined cancellation request.`);say(cancellationPrompt());
-}
 function cancellationTargets(text){
   const n=norm(text);
   if(state.selectedBooking && /\b(?:this|that|the same)\s+(?:booking|one)\b|\b(?:cancel|cancellation)\s+(?:this|that)\b/.test(n)) return [state.selectedBooking];
@@ -473,98 +676,265 @@ function startCancellation(text){
   if(!list.length){trail("CLARIFY","No active bookings matched.");say("I couldn't find an active booking matching that request.");return}
   state.bookingCandidates=list;state.pending="CHOOSE";state.state="BOOKING_LOOKUP";trail("CLARIFY","Listed upcoming bookings for cancellation selection.");say("Sure. Here are the upcoming bookings available under your access:\n\n"+list.map((b,i)=>`${i+1}. ${formatShort(b)}`).join("\n")+"\n\nWhich one would you like to cancel? You can say the number, city, route, or date.");
 }
+
+/* =========================
+   CANCELLATION: quote, re-check, confirm, fee disputes
+   ========================= */
+function cancellationPrompt(){return "Before I cancel this booking, has your travel plan changed and would you like to reschedule instead? You can say yes or no."}
+function refundSentence(b){return b.cancelFee?`For ${b.pnr}, the cancellation fee is ${money(b.cancelFee)}, so you'd get ${money(b.refund)} back.`:`For ${b.pnr}, there's no cancellation fee, so you'd get the full ${money(b.refund)} back.`}
+function askCancellationFor(b){
+  state.disputeExplained=false;signal("progress",-10);
+  state.selectedBookings=[b];state.selectedBooking=b;state.booking=b.pnr;state.pending="CANCEL_RESCHEDULE";state.state="CANCELLATION";trail("CLARIFY",`Identified ${b.pnr} for cancellation; one reschedule check.`);say(cancellationPrompt());
+}
+function askCancellationForBoth(a,b){
+  state.disputeExplained=false;signal("progress",-10);
+  state.selectedBookings=[a,b];state.selectedBooking=a;state.booking=`${a.pnr} + ${b.pnr}`;state.pending="CANCEL_RESCHEDULE";state.state="CANCELLATION";trail("CLARIFY",`Identified ${a.pnr} and ${b.pnr} for one combined cancellation request.`);say(cancellationPrompt());
+}
 function askCancellationTerms(){
   const bs=state.selectedBookings;
-  const lines=bs.map(b=>refundSentence(b));
-  state.pending="CANCEL_CONFIRM";state.state="CANCELLATION";trail("CLARIFY","Cancellation policy and final refund stated; confirmation required.");
-  say(lines.join("\n")+`\n\nDo you confirm that you agree with the cancellation and want to proceed?`);
+  bs.forEach(b=>state.facts.push(`${b.pnr}: cancellation fee ${money(b.cancelFee)}, refund ${money(b.refund)}`));
+  state.pending="CANCEL_CONFIRM";state.state="CANCELLATION";trail("CLARIFY","Cancellation fee and refund stated; confirmation required.");
+  say(bs.map(refundSentence).join("\n")+`\n\nDo you agree, and shall I go ahead with the cancellation?`);
+}
+function recheckThenCancel(){
+  // Production: re-price with the airline/hotel (GDS) right before acting. The quote is only an estimate.
+  const changed=state.selectedBookings.filter(b=>b.recheck&&!b.rechecked);
+  if(changed.length){
+    changed.forEach(b=>{b.rechecked=true;b.quotedRefund=b.refund;b.refund=b.recheck.refund;b.cancelFee=b.fare-b.refund;state.facts.push(`${b.pnr} re-check: refund now ${money(b.refund)} (was ${money(b.quotedRefund)})`)});
+    state.pending="CANCEL_CONFIRM";
+    trail("CLARIFY","Refund re-checked with the airline before cancelling; it changed, so the caller was asked again. Nothing cancelled.");
+    return say(`Before cancelling, I re-checked with the airline. `+changed.map(b=>`For ${b.pnr}, ${b.recheck.why}, so the refund is now ${money(b.refund)} instead of the ${money(b.quotedRefund)} I quoted.`).join(" ")+` Do you still want me to cancel?`);
+  }
+  completeCancellation();
 }
 function completeCancellation(){
   const bs=state.selectedBookings;if(!bs.length)return;
   bs.forEach(b=>{b.status="Cancelled";b.refundStatus="Processing"});
   const summary=bs.map(b=>`${b.pnr}: ${money(b.refund)} refund`).join("; ");
-  state.pending=null;state.state="IDLE";state.booking=bs.map(b=>b.pnr).join(" + ");trail("AUTOMATE",`Cancellation completed for ${bs.map(b=>b.pnr).join(", ")}.`);
-  say(`Cancellation completed. ${summary}. You’ll get an SMS and email confirmation, and the refund will be credited to your original mode of payment.`);uiContext();
+  bs.forEach(b=>state.actions.push(`Cancelled ${b.pnr}, refund ${money(b.refund)}`));
+  state.pending=null;state.state="IDLE";state.booking=bs.map(b=>b.pnr).join(" + ");signal("progress",-10);
+  trail("AUTOMATE",`Cancellation completed for ${bs.map(b=>b.pnr).join(", ")}.`);resolved();
+  say(`Cancellation completed. ${summary}. You'll get an SMS and email confirmation, and the refund will go back to the original mode of payment.`);uiContext();
+}
+const DISPUTE_RE=/^(no|n|nope|nah|dont|do not|stop)\b|don.?t agree|do not agree|disagree|too high|too much|so much|wrong|expensive|unfair|not fair|why.*(fee|charge)|not ok/;
+function feeDispute(text){
+  const n=norm(text),bs=state.selectedBookings;
+  signal("fee_dispute",15);
+  const companySide=/\b(company|office|manager|client|meeting|event|conference|official|not my fault|wasnt my|boss|business reason)\b/.test(n);
+  if(companySide||state.disputeExplained){
+    return handoff(companySide
+      ?"I understand. Since the change came from the company's side, the travel desk can check whether the fee can be waived. I can't waive fees myself, so I'm passing this to them with the fee details and what you've told me. Nothing has been cancelled."
+      :"I understand. I'll have the travel desk review the fee with you. Nothing has been cancelled, and I'm passing along the fee details and everything you've told me so you don't have to repeat it.",
+      companySide?"fee_dispute_company_initiated":"fee_dispute",
+      `Caller disputes the cancellation fee on ${bs.map(b=>`${b.pnr} (${money(b.cancelFee)})`).join(", ")}${companySide?"; says the change was company-initiated":""}. Nothing cancelled.`);
+  }
+  state.disputeExplained=true;state.pending="FEE_DISPUTE";
+  const b=bs[0],cheaper=bs.length===1&&b.changeFee<b.cancelFee;
+  trail("CLARIFY","Caller disputed the fee: explained the fare rule and offered options. Nothing cancelled.");
+  say(`I understand. Here's where the fee comes from. `+bs.map(x=>`For ${x.pnr}, ${x.feeRule}${x.rechecked&&x.recheck?`, and ${x.recheck.why}`:""}.`).join(" ")
+    +`\n\n${cheaper?`If your trip has moved rather than been called off, changing the date costs ${b.changeFee?money(b.changeFee):"nothing"} plus any fare difference, instead of the ${money(b.cancelFee)} cancellation fee. `:""}`
+    +`Would you like me to ${cheaper?"check new dates, ":""}go ahead with the cancellation, or have the travel desk review the fee?`);
 }
 
-function startReschedule(text){
-  state.intent="RESCHEDULE";
-  const contextual=state.selectedBooking && /\b(?:this|that|the same)\s+(?:booking|one)\b/.test(norm(text)) ? [state.selectedBooking] : [];
-  const hits=contextual.length?contextual:exactCandidates(text);
-  if(!hits.length){trail("CLARIFY","Reschedule needs an identifiable booking.");say("No problem. Tell me the route, city, hotel, or travel date you have in mind, and I’ll identify the booking for you.");state.pending="RESCHEDULE_IDENTIFY";state.state="RESCHEDULE";return}
+/* =========================
+   RESCHEDULING: new date -> options -> policy -> read back -> re-check -> change
+   ========================= */
+function startReschedule(text,ai){
+  state.intent="RESCHEDULE";state.rescheduleText=text;state.rescheduleAI=ai||null;
+  const contextual=state.selectedBooking&&/\b(?:this|that|the same)\s+(?:booking|one|flight|hotel)\b/.test(norm(text))?[state.selectedBooking]:[];
+  let hits=contextual.length?contextual:exactCandidates(text);
+  if(!hits.length&&dateKeysFromText(text).length)hits=exactCandidates(stripDates(text));
+  if(!hits.length&&ai?.booking_id){const b=bookingByPnr(ai.booking_id);if(b)hits=[b]}
+  const sn=norm(stripDates(text));
+  if(!hits.length&&(stayCityName(sn)||codeHits(sn).length||pnrFrom(text)))return human("I couldn't find a booking that matches that in your account. Let me connect you with the travel desk so they can check.","Date change asked for a booking that isn't in the caller's accessible bookings.","booking_not_found");
+  if(!hits.length){trail("CLARIFY","Reschedule needs an identifiable booking.");state.pending="RESCHEDULE_IDENTIFY";state.state="RESCHEDULE";return say("Sure. Which booking would you like to move? Tell me the route, city, hotel or travel date.")}
   if(hits.length>1)return showChoices(hits,"RESCHEDULE");
-  handoffReschedule(hits[0]);
+  planReschedule(hits[0],text,ai);
 }
-function handoffReschedule(b){
-  state.selectedBooking=b;state.booking=b.pnr;state.pending=null;state.state="HUMAN";trail("HUMAN",`Reschedule requested for identified booking ${b.pnr}.`);say(`I’ve identified ${b.pnr}. Let me get you to someone on the travel desk who can find you the best new dates. I’ll pass this along with everything you’ve told me so you don’t have to repeat it.`);
+function planReschedule(b,text,ai){
+  state.intent="RESCHEDULE";state.selectedBooking=b;state.selectedBookings=[b];state.booking=b.pnr;state.state="RESCHEDULE";
+  if(b.status==="Cancelled")return handoff(`${b.pnr} has already been cancelled, so it can't be moved. I'll pass you to the travel desk to make a new booking.`,"rebook_after_cancel",`Caller wants to move ${b.pnr}, which is already cancelled.`);
+  if(b.status==="Pending Approval")return handoff(`${b.pnr} is still waiting for approval, so I can't change it yet. I'm passing this to the travel desk so they can update the request with your approver.`,"policy_pending_approval",`Date change requested on ${b.pnr}, which is still pending approval.`);
+  if(daysBetween(DEMO_TODAY,b.date)<1)return handoff(`${b.pnr} departs within 24 hours, so the travel desk needs to handle this change. I'm passing it to them now.`,"policy_close_to_departure",`Date change requested on ${b.pnr} within 24 hours of departure.`);
+  const d=newDateFromText(text||"",b,ai);
+  if(!d){state.pending="RESCHEDULE_DATE";trail("CLARIFY",`Date change on ${b.pnr}: asked for the new date.`);
+    return say(`Sure. ${b.type==="Stay"?`${b.stayName} is booked for ${b.dateLabel}`:`${b.pnr} is ${spokenRoute(b)} on ${prettyDate(b.date)}`}. What date would you like to move it to?`)}
+  offerOptions(b,d);
 }
+function mkOption(b,o){o.fareDiff=Math.max(0,o.fare-b.fare);o.extra=b.changeFee+o.fareDiff;o.needsApproval=o.extra/(b.travelers||1)>POLICY.extraLimitPerTraveller;return o}
+function optionLine(o,i){return `${i+1}. ${o.time} → ${o.arrive}: ${o.extra?`${money(o.extra)} extra`:"no extra cost"}${o.lastSeats?" (last 2 seats)":""}${o.needsApproval?", needs manager approval":""}`}
+function offerOptions(b,d){
+  state.selectedBooking=b;state.newDate=d;state.state="RESCHEDULE";
+  if(d<=DEMO_TODAY){state.pending="RESCHEDULE_DATE";trail("CLARIFY","Requested date is not in the future.");return say(`${prettyDate(d)} has already passed. What later date would you like?`)}
+  if(d===b.date){state.pending="RESCHEDULE_DATE";trail("CLARIFY","Requested date is the current travel date.");return say(`That's the date it's already booked for. What new date would you like?`)}
+  if(b.type==="Stay"){
+    const nights=stayNights(b),fare=Math.round(b.fare*(0.97+seeded(b.pnr+d)*0.15)/10)*10;
+    const opt=mkOption(b,{kind:"stay",date:d,label:stayLabel(d,nights),fare});
+    state.rescheduleOptions=[opt];
+    trail("CLARIFY",`Priced ${b.stayName} for ${opt.label}; hotel change rules and policy limit applied.`);
+    return confirmReschedule(opt);
+  }
+  const key=`${b.from}-${b.to}`,dur=FLIGHT_MINUTES[key]||120,r=seeded(key+d);
+  const opts=[["07:10",0.95+r*0.08],["13:45",1.03+r*0.1],["20:30",1.2+r*0.14]].map(([time,f],i)=>mkOption(b,{kind:"flight",date:d,time,arrive:addMinutes(time,dur),fare:Math.round(b.fare*f/10)*10,lastSeats:i===2}));
+  state.rescheduleOptions=opts;state.pending="RESCHEDULE_PICK";
+  state.facts.push(`${b.pnr} options on ${shortDate(d)}: `+opts.map(o=>`${o.time} ${money(o.extra)} extra`).join(", "));
+  trail("CLARIFY",`Found ${opts.length} ${b.room} flights on ${shortDate(d)} for ${b.pnr}; change fee ${money(b.changeFee)} plus fare difference; policy limit checked.`);
+  say(`Here are the ${b.room.toLowerCase()} flights from ${cityName(b.from)} to ${cityName(b.to)} on ${prettyDate(d)}:\n\n`+opts.map(optionLine).join("\n")
+    +`\n\nThe extra is ${b.changeFee?`the ${money(b.changeFee)} change fee plus `:""}the fare difference. Which one would you like?`);
+}
+function relistOptions(){
+  const b=state.selectedBooking;state.pending="RESCHEDULE_PICK";trail("CLARIFY","Options read out again.");
+  say(`Here are the options again for ${prettyDate(state.newDate)}:\n\n`+state.rescheduleOptions.map(optionLine).join("\n")+`\n\nWhich one would you like? You can also give me a different date.`);
+}
+function pickOption(text){
+  const n=norm(text),opts=state.rescheduleOptions||[];if(!opts.length)return null;
+  let h=null,mm=null,ap=null,m=n.match(/\b(\d{1,2})[:.](\d{2})\s*(am|pm)?\b/);
+  if(m){h=+m[1];mm=+m[2];ap=m[3]||null}else if((m=n.match(/\b(\d{1,2})\s*(am|pm)\b/))){h=+m[1];ap=m[2]}
+  if(h!==null){if(ap==="pm"&&h<12)h+=12;if(ap==="am"&&h===12)h=0;
+    const hits=opts.filter(o=>{const[oh,om]=o.time.split(":").map(Number);return (oh===h||(!ap&&oh===h+12))&&(mm===null||om===mm)});if(hits.length===1)return hits[0]}
+  const ord={first:1,second:2,third:3,one:1,two:2,three:3};
+  m=n.match(/\b(first|second|third)\b/)||n.match(/\b(?:option|number|no)\s*(one|two|three|[1-3])\b/)||n.match(/^(?:the )?([1-3]|one|two|three)\b/);
+  if(m)return opts[(ord[m[1]]||+m[1])-1]||null;
+  if(/cheapest|lowest|least/.test(n))return opts.slice().sort((a,b)=>a.extra-b.extra)[0];
+  if(/morning|earliest|early/.test(n))return opts[0];
+  if(/afternoon|noon|lunch/.test(n))return opts[1]||null;
+  if(/evening|night|latest|last one/.test(n))return opts[opts.length-1];
+  return null;
+}
+function costSentence(b,o){
+  if(!o.extra)return "There's no extra cost.";
+  const parts=[];if(b.changeFee)parts.push(`change fee ${money(b.changeFee)}`);if(o.fareDiff)parts.push(`${b.type==="Stay"?"rate":"fare"} difference ${money(o.fareDiff)}`);
+  return `That's ${parts.join(" plus ")}, so ${money(o.extra)} extra, charged to the ${b.payment}.`;
+}
+function confirmReschedule(opt){
+  const b=state.selectedBooking;state.pickedOption=opt;signal("progress",-10);
+  const what=b.type==="Stay"?`move ${b.stayName} from ${b.dateLabel} to ${opt.label}`:`move ${b.pnr}, ${spokenRoute(b)}, from ${prettyDate(b.date)} to ${prettyDate(opt.date)}, departing ${opt.time}`;
+  state.facts.push(`${b.pnr} change quote: ${opt.label||shortDate(opt.date)+" "+opt.time}, ${money(opt.extra)} extra`);
+  if(opt.needsApproval){
+    state.pending="APPROVAL_CONFIRM";trail("CLARIFY",`Change costs ${money(opt.extra)}, above the ${money(POLICY.extraLimitPerTraveller)}-per-traveller policy limit; manager approval needed.`);
+    return say(`To ${what}: ${costSentence(b,opt)} That's above ${POLICY.company}'s limit of ${money(POLICY.extraLimitPerTraveller)} extra per traveller, so it needs your manager's approval. Shall I send the approval request? Nothing changes on your booking until it's approved.`);
+  }
+  state.pending="RESCHEDULE_CONFIRM";trail("CLARIFY","New date and total cost read back; confirmation required.");
+  say(`To confirm, I'll ${what}. ${costSentence(b,opt)} Shall I go ahead?`);
+}
+function recheckThenReschedule(){
+  // Production: re-price with the GDS right before ticketing. If it moved, tell the caller and ask again.
+  const b=state.selectedBooking,o=state.pickedOption;
+  if(o.lastSeats&&!o.rechecked){
+    o.rechecked=true;const old=o.extra,bump=600*(b.travelers||1);o.fare+=bump;mkOption(b,o);
+    state.facts.push(`${b.pnr} re-check: ${o.time} fare up ${money(bump)}, extra now ${money(o.extra)}`);
+    trail("CLARIFY",`Fare re-checked before changing: up ${money(bump)} since the quote. Caller asked again; nothing changed.`);
+    const head=`Before changing it, I re-checked the fare: the ${o.time} flight has gone up by ${money(bump)} since I quoted it, so the extra is now ${money(o.extra)} instead of ${money(old)}.`;
+    if(o.needsApproval){state.pending="APPROVAL_CONFIRM";return say(`${head} That's above the ${money(POLICY.extraLimitPerTraveller)}-per-traveller limit, so it now needs your manager's approval. Shall I send the approval request, or would you like a different flight?`)}
+    state.pending="RESCHEDULE_CONFIRM";return say(`${head} Do you still want me to go ahead?`);
+  }
+  completeReschedule();
+}
+function completeReschedule(){
+  const b=state.selectedBooking,o=state.pickedOption,oldDate=b.date;
+  b.date=o.date;if(b.type==="Stay")b.dateLabel=o.label;else b.departs=o.time;
+  b.fare+=o.fareDiff;b.status="Confirmed";b.changedFrom=oldDate;
+  const act=`Moved ${b.pnr} from ${shortDate(oldDate)} to ${b.type==="Stay"?o.label:`${shortDate(o.date)} ${o.time}`}; ${money(o.extra)} charged to ${b.payment}`;
+  state.actions.push(act);state.pending=null;state.state="IDLE";signal("progress",-10);
+  trail("AUTOMATE",act+".");resolved();
+  say(`Done. ${b.type==="Stay"?`${b.stayName} is now booked for ${o.label}`:`${b.pnr} is now on ${prettyDate(o.date)}, departing ${o.time}`}.${o.extra?` ${money(o.extra)} has been charged to the ${b.payment}.`:""} You'll get the updated ${b.type==="Stay"?"hotel voucher":"e-ticket"} by SMS and email.`);
+  if(b.type==="Flight"){
+    const stay=accessibleBookings().find(s=>s.type==="Stay"&&s.linkedFlight===b.pnr);const delta=daysBetween(oldDate,o.date);
+    if(stay&&delta){state.linkedStay={stay,delta};state.pending="LINKED_STAY";
+      trail("CLARIFY",`Linked hotel ${stay.pnr} is still on the old dates; asked whether to move it too.`);
+      say(`Your ${stay.stayName} is still booked for ${stay.dateLabel}. Would you like me to move it by the same ${Math.abs(delta)} day${Math.abs(delta)>1?"s":""}?`)}
+  }
+  uiContext();
+}
+function sendApproval(){
+  const b=state.selectedBooking,o=state.pickedOption;
+  state.actions.push(`Approval request sent to the manager: move ${b.pnr} to ${o.label||shortDate(o.date)+" "+o.time}, ${money(o.extra)} extra`);
+  handoff("Done. I've sent the request to your manager. Your current booking stays as it is until it's approved. Once it is, the travel desk will re-check the fare and confirm the change by SMS and email.",
+    "approval_required",`Date change on ${b.pnr} costs ${money(o.extra)}, above the ${money(POLICY.extraLimitPerTraveller)}-per-traveller policy limit; sent for manager approval. Not changed yet.`);
+}
+function closeNoChange(){state.pending=null;state.state="IDLE";trail("AUTOMATE","Caller chose to keep the booking as it is.");resolved();say("Okay, I haven't changed anything. Your booking stays as it is.")}
 
+/* =========================
+   REFUNDS (read-only)
+   ========================= */
 function refundInfo(text){
   state.intent="REFUND";
-  const contextual=state.selectedBooking && /\b(?:this|that|the same)\s+(?:booking|one)\b/.test(norm(text)) ? [state.selectedBooking] : [];
+  if(/\b(cash|cheque|check payment|bank transfer|different account|another account|upi)\b/.test(norm(text)))return human("Refunds go back to the original mode of payment. To ask for a different refund method, I'll connect you with the travel desk.","Caller asked for a refund to a different payment method.","refund_method");
+  const contextual=state.selectedBooking && /\b(?:this|that|the same)\s+(?:booking|one|flight|hotel)\b/.test(norm(text)) ? [state.selectedBooking] : [];
   const hits=contextual.length?contextual:exactCandidates(text,{includeCancelled:true});
-  if(!hits.length){trail("CLARIFY","Refund lookup needs an identifiable booking.");say("Sure. Tell me the route, city, hotel, or travel date, and I’ll check the refund for you.");state.pending="REFUND_IDENTIFY";state.state="REFUND";return}
+  if(!hits.length){trail("CLARIFY","Refund lookup needs an identifiable booking.");say("Sure. Tell me the route, city, hotel, or travel date, and I'll check the refund for you.");state.pending="REFUND_IDENTIFY";state.state="REFUND";return}
   if(hits.length>1)return showChoices(hits,"REFUND");
   refundInfoFor(hits[0]);
 }
 function refundInfoFor(b){
-  state.selectedBooking=b;state.booking=b.pnr;state.pending=null;state.state="IDLE";trail("AUTOMATE",`Read-only refund lookup for ${b.pnr}.`);
-  if(b.status==="Cancelled") say(`For ${b.pnr}, the refund amount is ${money(b.refund)} and the refund is being processed to the original mode of payment. You’ll receive SMS and email confirmation with the refund details.`);
-  else say(`For ${b.pnr}, no refund has been initiated because the booking is still ${b.status.toLowerCase()}. If it is cancelled, the cancellation fee is ${money(b.cancelFee)} and the refund would be ${money(b.refund)}. This is a read-only lookup; nothing has been cancelled.`);
+  state.selectedBooking=b;state.booking=b.pnr;state.pending=null;state.state="IDLE";trail("AUTOMATE",`Read-only refund lookup for ${b.pnr}.`);resolved();
+  state.facts.push(`${b.pnr}: refund ${money(b.refund)}${b.status==="Cancelled"?" processing":" if cancelled"}`);
+  if(b.status==="Cancelled") say(`For ${b.pnr}, the refund amount is ${money(b.refund)} and it's being processed to the original mode of payment. You'll get an SMS and email with the refund details.`);
+  else say(`For ${b.pnr}, no refund has been started because the booking is still ${b.status.toLowerCase()}. If it's cancelled, the cancellation fee is ${money(b.cancelFee)} and the refund would be ${money(b.refund)}. Nothing has been cancelled.`);
 }
-
-function human(message,reason){state.pending=null;state.state="HUMAN";trail("HUMAN",reason);say(message)}
 
 /* =========================
-   OPTIONAL GEMINI LANGUAGE LAYER
-   AI understands natural language; deterministic functions below still control
-   access, policy, fees, refunds, transactions and human handoff.
-   NOTE: a browser API key is visible to the user. Use a server-side proxy in production.
+   AI LANGUAGE LAYER (Gemini, through the server)
+   AI understands the words; the rules above still control access, policy, fees, refunds,
+   every change to a booking and every handoff.
    ========================= */
-const GEMINI_MODELS=["gemini-3.5-flash-lite","gemini-3.5-flash","gemini-3.8-flash"]; /* first = default; the server falls back down this list */
-let geminiModel=(()=>{let m=null;try{m=localStorage.getItem("voicebot_gemini_model")||localStorage.getItem("mybiz_gemini_model");}catch(e){}return GEMINI_MODELS.includes(m)?m:GEMINI_MODELS[0];})();
-const aiStatusEl=()=>$('aiStatus');
-function updateAIStatus(msg,ok=false){if(aiStatusEl()){aiStatusEl().textContent=msg;aiStatusEl().style.color=ok?"#147a42":"#788298";}}
-function loadAISettings(){
-  $("geminiModel").value=geminiModel;
-  updateAIStatus("AI language layer • Vercel server proxy",true);
+async function callAI(prompt,timeoutMs=9000){
+  const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),timeoutMs);
+  try{
+    const res=await fetch("/api/gemini",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt}),signal:ctrl.signal});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(data.error||`AI service ${res.status}`);
+    if(!data?.result||typeof data.result!=="object")throw new Error("Invalid AI response");
+    return data.result;
+  }finally{clearTimeout(t)}
 }
+function updateAIStatus(ok){$("aiStatus").textContent=ok?"Language understanding: Gemini (rules decide every action)":"Language understanding: AI unavailable, rule-based fallback in use";$("aiStatus").style.color=ok?"#147a42":"#8a5a00"}
 async function geminiUnderstand(text){
   const caller=state.user;
   const accessible=accessibleBookings().map(b=>({booking_id:b.pnr,type:b.type,from:b.from||null,to:b.to||null,stay:b.stayName||null,date:b.date,date_label:b.dateLabel||null,status:b.status,traveler:b.traveler,booking_for:b.bookingFor||null,travelers:b.travelers||1}));
-  const prompt=`You are the language-understanding layer for a corporate travel post-sales voice assistant.
-Caller: ${caller.name}; role: ${caller.role}; company: ${caller.company}.
+  const ctx=state.selectedBooking?`\nThe booking being discussed is ${state.selectedBooking.pnr}, currently on ${state.selectedBooking.date}.`:"";
+  const prompt=`You are the language-understanding layer for a corporate travel post-booking voice assistant in India.
+Caller: ${caller.name}; role: ${caller.role}; company: ${caller.company}. Today is ${DEMO_TODAY}.${ctx}
 Only use these accessible booking records to resolve a booking:
 ${JSON.stringify(accessible)}
 
-Classify the user's request. Return ONLY valid JSON with these keys:
+The caller may speak English, Hindi, Hinglish (Hindi in Roman script mixed with English) or Devanagari, for example "mera Bombay wala flight cancel kar do", "Hyderabad trip ki date aage karni hai", "paise kab wapas aayenge". Speech-to-text may contain small errors.
+
+Return ONLY valid JSON with these keys:
 intent: one of DETAILS, CANCEL, RESCHEDULE, REFUND, COMPANY_BOOKINGS, UNSUPPORTED
 booking_id: exact accessible booking_id if clearly identified, otherwise null
 booking_type: FLIGHT, STAY, BOTH, or null
-from_city: Bangalore, Delhi, Bombay, Hyderabad, or null
-to_city: Bangalore, Delhi, Bombay, Hyderabad, or null
-stay_city: Bangalore, Delhi, Bombay, Hyderabad, or null
+from_city, to_city, stay_city: Bangalore, Delhi, Bombay, Hyderabad, or null
 wants_all: true/false
+new_date: for a date change, the new date as YYYY-MM-DD if the caller gives one (relative phrases like "a week later" are relative to the booking's current date; "next Monday" is relative to today), otherwise null
+wants_agent: true only if the caller asks for a human, agent or the travel desk
+caller_upset: true only if the words clearly show anger or frustration
 confidence: number from 0 to 1
 reason: short explanation
 
-Rules: understand natural language and aliases, but never invent a booking. “cancel/get rid of/drop” can mean CANCEL. “move/change/push” can mean RESCHEDULE. “money back/refund” means REFUND. “what all/my bookings/my flights/my stays” means DETAILS with wants_all=true. Company-wide requests are COMPANY_BOOKINGS.
+Rules: never invent a booking. "cancel/get rid of/drop/raddh" means CANCEL. "move/change/push/shift/aage/peeche/date badalni" means RESCHEDULE. "money back/refund/paise wapas" means REFUND. "what all/my bookings/my flights/my stays/dikhao" means DETAILS with wants_all=true. Company-wide requests are COMPANY_BOOKINGS.
 User: ${JSON.stringify(text)}`;
   try{
-    updateAIStatus("AI is understanding the request…");
-    const res=await fetch("/api/gemini",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,model:geminiModel})});
-    const data=await res.json().catch(()=>({}));
-    if(!res.ok)throw new Error(data.error||`AI service ${res.status}`);
-    const parsed=data?.result;
-    if(!parsed||typeof parsed!=="object")throw new Error("Invalid AI response");
-    const used=data.modelUsed||geminiModel;updateAIStatus(`AI enabled • ${used}${used!==geminiModel?" (fallback)":""} • understood as ${parsed.intent||"request"}`,true);
-    trail("AUTOMATE",`AI language layer: ${parsed.intent||"UNSUPPORTED"}${parsed.booking_id?` • ${parsed.booking_id}`:""}`);
+    const parsed=await callAI(prompt);updateAIStatus(true);
+    trail("AUTOMATE",`AI understood: ${parsed.intent||"UNSUPPORTED"}${parsed.booking_id?` • ${parsed.booking_id}`:""}${parsed.new_date?` • new date ${parsed.new_date}`:""}`);
     return parsed;
   }catch(e){
-    updateAIStatus("AI unavailable; deterministic fallback active.");
-    trail("CLARIFY",`AI understanding unavailable; deterministic fallback used (${e.message}).`);
+    updateAIStatus(false);trail("CLARIFY",`AI understanding unavailable; rule-based fallback used (${e.message}).`);
     return null;
   }
+}
+async function toHinglish(text){
+  // Rewrites the bot's reply into Hinglish. Guardrail: every amount, booking reference, time and number
+  // must come back unchanged, otherwise the English reply is used.
+  const keep=(text.match(/₹[\d,]+|\b[A-Z]{3}H?\d{4}\b|\b\d{1,2}:\d{2}\b|\b\d+\b/g)||[]);
+  try{
+    const r=await callAI(`Rewrite this reply from a corporate travel assistant in natural spoken Hinglish: Hindi written in Roman script, mixed with the everyday English words office travellers in Delhi or Mumbai use (flight, booking, refund, cancel, date, fee). Keep it polite (use "aap"). Keep every amount, booking reference, date, time and number exactly as written, keep line breaks and numbered lists, and do not add or remove any information.
+Return ONLY JSON: {"text": "..."}
+Reply: ${JSON.stringify(text)}`,8000);
+    const h=String(r.text||"").trim();
+    if(h&&keep.every(k=>h.includes(k)))return h;
+    return text;
+  }catch(e){return text}
 }
 function applyAIHints(text,ai){
   if(!ai)return text;
@@ -575,188 +945,244 @@ function applyAIHints(text,ai){
   if(ai.wants_all && !/\ball\b/i.test(enriched)) enriched += " all";
   return enriched;
 }
-function unsupported(){setFrustration(5);human("I can help with flights, stays, cancellations, rescheduling, and refunds. For anything outside that, I’ll connect you with the travel desk.","Request outside the supported travel-assistance scope.")}
+function unsupported(){human("I can help with your flights and stays: booking details, cancellations, date changes and refunds. For anything else, I'll connect you with the travel desk.","Request outside what the assistant handles.","out_of_scope")}
 function intentOf(text){const n=norm(text);
-  if(/refund|money back|where.*refund|when.*refund|how much.*get back/.test(n))return "REFUND";
-  if(/resched|change.*date|move.*date|move .*dates|shift.*date|push.*date/.test(n))return "RESCHEDULE";
-  if(/cancel|cancellation/.test(n))return "CANCEL";
-  if(/(?:company|corporate)\s+(?:booking|bookings|travel|trips)|(?:all|show|share|list|give|provide).*(?:booking|bookings|trips|travel).*(?:my|our)\s+company|(?:my|our)\s+company.*(?:booking|bookings|trips|travel)|(?:booking|bookings|trips|travel).*(?:my|our)\s+company|company.*(?:next month|upcoming month)|(?:next month|upcoming month).*company/.test(n))return "COMPANY_BOOKINGS";
-  if(/share|show|give|provide|tell|details|detail|what.*booked|booking details|flight details|stay details|hotel details/.test(n) && /flight|stay|hotel|booking|trip/.test(n))return "DETAILS";
+  if(/(?:company|corporate)\s+(?:booking|bookings|travel|trips)|(?:all|show|share|list|give|provide).*(?:booking|bookings|trips|travel).*(?:my|our)\s+company|(?:my|our)\s+company.*(?:booking|bookings|trips|travel)|company.*(?:next month|upcoming month)|(?:next month|upcoming month).*company/.test(n))return "COMPANY_BOOKINGS";
+  if(/refund|money back|my money|paisa|kitna milega|how much.*(get back|lose)/.test(n))return "REFUND";
+  if(/resched|change.*date|date.*change|\bmove\b|\bshift\b|\bpush\b|\blater\b|\bearlier\b|postpone|prepone|next week|a day later|another date|different date/.test(n))return "RESCHEDULE";
+  if(/cancel|cancellation|get rid of|\bdrop\b|\bscrap\b|\bkill\b|call off|don.?t need|won.?t need|no longer need/.test(n))return "CANCEL";
+  if(/(share|show|give|provide|tell|detail|what all|\blist\b|when is|what time|which|upcoming|booked)/.test(n)&&(/(flight|stay|hotel|booking|trip|travel)/.test(n)||pnrFrom(n)))return "DETAILS";
   return "UNSUPPORTED";
 }
 
+/* =========================
+   CONVERSATION ROUTER
+   ========================= */
+const YES_RE=/^(yes|y|yeah|yep|yup|sure|ok|okay|confirm|confirmed|proceed|go ahead|do it|please do|correct|right)\b/;
+const NO_RE=/^(no|n|nope|nah|dont|do not|not now|stop)\b/;
 async function respond(text){
-  if(!text.trim())return;userSay(text);const n=norm(text);
-  // State-first replies: never restart a flow just because the caller's answer contains a generic word.
+  if(!text.trim())return;
+  if("speechSynthesis" in window)speechSynthesis.cancel();
+  userSay(text);state.turns++;state.silences=0;
+  const t=toEnglishCues(text),n=norm(t);
+
+  // Frustration signals from the caller's own words
+  if(state.lastUserText&&n===state.lastUserText&&n.split(" ").length>1)signal("entity_retention_failure",15);
+  state.lastUserText=n;
+  if(ESCALATION_RE.test(n))signal("escalation_language",20);
+  if(/\b(not that one|the other one|wrong one|not this one|i meant|thats not (?:it|what i))\b/.test(n))signal("resolution_error",10);
+  if(state.turns>8)signal("long_journey",5);
+  renderOutcome();
+
+  // A request for a person is always honoured straight away
+  if(state.state!=="HUMAN"&&wantsAgent(n)){
+    const dispute=state.pending==="FEE_DISPUTE";
+    return handoff("Sure. I'm connecting you to the travel desk now, and I'll pass along everything you've told me so you don't have to repeat it.",dispute?"fee_dispute":"caller_requested_agent",dispute?"Caller disputes the fee and asked for the travel desk. Nothing cancelled.":"Caller asked for a person.");
+  }
+  if(thresholdHandoff())return;
+
+  // State-first replies: never restart a flow because an answer contains a generic word
   if(state.pending==="CHOOSE"){
-    const b=chooseFromList(text);if(!b){setFrustration(6);say("No worries. Just tell me the city, route, or travel date again — for example, “Delhi one” or “Bangalore to Delhi”.");trail("CLARIFY","Booking selection was ambiguous.");return}
+    const b=chooseFromList(t);
+    if(!b){signal("resolution_error",10);say("Sorry, I couldn't tell which one you mean. Please say the number, city, route or travel date, for example \"the first one\" or \"Bangalore to Delhi\".");trail("CLARIFY","Booking choice was unclear.");return}
     state.pending=null;state.bookingCandidates=[];
     if(state.intent==="CANCEL")return askCancellationFor(b);
-    if(state.intent==="RESCHEDULE")return handoffReschedule(b);
+    if(state.intent==="RESCHEDULE")return planReschedule(b,state.rescheduleText,state.rescheduleAI);
     if(state.intent==="REFUND")return refundInfoFor(b);
-    if(state.intent==="DETAILS")return showDetails(b);
+    return showDetails(b);
   }
   if(state.pending==="CANCEL_RESCHEDULE"){
-    if(/^(yes|y|yeah|yep|sure|ok|okay|reschedule|change it|do that)\b/.test(n)){
-      const names=state.selectedBookings.map(b=>b.pnr).join(" and ");return human(`I’ve identified ${names}. Let me get you to someone on the travel desk who can find you the best new dates. I’ll pass this along with everything you’ve told me so you don’t have to repeat it.`,`Caller chose reschedule instead of cancellation for ${names}.`)
+    if(YES_RE.test(n)||/^(reschedule|change it|change the date|move it)\b/.test(n)){
+      const b=state.selectedBookings.find(x=>x.type==="Flight")||state.selectedBookings[0];
+      return planReschedule(b,t,null);
     }
-    if(/^(no|n|nope|nah|cancel|continue|go ahead)\b/.test(n))return askCancellationTerms();
-    setFrustration(3);say("Just to confirm: would you like to reschedule instead? You can say yes or no.");trail("CLARIFY","Reschedule choice required.");return;
+    if(NO_RE.test(n)||/^(cancel|continue|go ahead)\b/.test(n))return askCancellationTerms();
+    signal("redundant_clarification",5);trail("CLARIFY","Reschedule-or-cancel answer was unclear.");return say("Just to check: would you like to change the date instead of cancelling? You can say yes or no.");
   }
   if(state.pending==="CANCEL_CONFIRM"){
-    if(/^(yes|y|yeah|yep|sure|ok|okay|confirm|confirmed|proceed|go ahead|do it|cancel it)\b/.test(n))return completeCancellation();
-    if(/^(no|n|nope|nah|dont|do not|stop|i dont agree|i do not agree|disagree)\b/.test(n)||/don.?t agree|disagree|too high|wrong fee/.test(n))setFrustration(12);return human("Absolutely. I’ll have the travel desk review the fee and policy with you, and I’ll pass along everything you’ve already told me so you don’t have to repeat it.","Caller disputed the cancellation fee or policy; no cancellation processed.");
-    say("Please confirm whether you agree with the cancellation fee and refund and want me to proceed.");trail("CLARIFY","Cancellation confirmation required.");return;
+    if(YES_RE.test(n)||/^(cancel it|cancel)\b/.test(n))return recheckThenCancel();
+    if(DISPUTE_RE.test(n))return feeDispute(t);
+    signal("redundant_clarification",5);trail("CLARIFY","Unclear confirmation; asked again instead of acting.");return say("Just to confirm, do you want me to go ahead with this cancellation? You can say yes or no.");
   }
-  if(state.pending==="RESCHEDULE_IDENTIFY")return startReschedule(text);
-  if(state.pending==="REFUND_IDENTIFY")return refundInfo(text);
-  if(state.pending==="DETAILS_IDENTIFY")return startDetails(text);
+  if(state.pending==="FEE_DISPUTE"){
+    const b=state.selectedBookings[0];
+    if(/resched|new date|change|move|\bdates?\b|check/.test(n)&&state.selectedBookings.length===1)return planReschedule(b,t,null);
+    if(/leave it|keep it|don.?t cancel|do not cancel|never mind|forget it/.test(n))return closeNoChange();
+    if(DISPUTE_RE.test(n)||/\b(desk|review|still)\b/.test(n))return feeDispute(t);
+    if(/go ahead|proceed|cancel|^yes|^ok|^okay|^fine/.test(n))return askCancellationTerms();
+    signal("redundant_clarification",5);trail("CLARIFY","Unclear answer after the fee explanation.");
+    return say("Would you like me to check new dates, go ahead with the cancellation, or have the travel desk review the fee?");
+  }
+  if(state.pending==="RESCHEDULE_IDENTIFY")return startReschedule(t,null);
+  if(state.pending==="RESCHEDULE_DATE"){
+    const b=state.selectedBooking;
+    if(/^(no|leave it|leave|keep it|nothing|thats all|that is all|never mind|forget it|cancel that)\b/.test(n))return closeNoChange();
+    let d=newDateFromText(t,b,null);
+    if(!d){const ai=await geminiUnderstand(text);d=newDateFromText(t,b,ai)}
+    if(!d){signal("redundant_clarification",5);trail("CLARIFY","New date not understood.");return say("Sorry, I didn't catch the date. You can say something like \"14 October\" or \"a week later\".")}
+    return offerOptions(b,d);
+  }
+  if(state.pending==="RESCHEDULE_PICK"){
+    const b=state.selectedBooking,keys=dateKeysFromText(t).filter(k=>k!==state.newDate);
+    if(keys.length)return offerOptions(b,keys[keys.length-1]);
+    if(/^(no|none|neither|leave it|keep it|never mind)\b/.test(n))return closeNoChange();
+    const o=pickOption(t);
+    if(!o){signal("resolution_error",10);trail("CLARIFY","Flight choice was unclear.");return say("Which one would you like? You can say the number, like \"the second one\", or the time, like \"1:45\".")}
+    return confirmReschedule(o);
+  }
+  if(state.pending==="RESCHEDULE_CONFIRM"){
+    if(YES_RE.test(n))return recheckThenReschedule();
+    if(/other|different|another|options/.test(n))return relistOptions();
+    if(NO_RE.test(n)){state.pending="RESCHEDULE_DATE";trail("CLARIFY","Caller declined the change; nothing changed.");return say("No problem, nothing has changed. If you'd like a different date, tell me the date. Otherwise say \"leave it\".")}
+    signal("redundant_clarification",5);trail("CLARIFY","Unclear confirmation; asked again.");return say("Shall I go ahead with this change? You can say yes or no.");
+  }
+  if(state.pending==="APPROVAL_CONFIRM"){
+    if(/other|different|another|options/.test(n))return relistOptions();
+    if(YES_RE.test(n)||/^send\b/.test(n))return sendApproval();
+    if(NO_RE.test(n))return closeNoChange();
+    signal("redundant_clarification",5);trail("CLARIFY","Unclear answer on approval.");return say("Shall I send it to your manager for approval? You can also ask for a different flight.");
+  }
+  if(state.pending==="LINKED_STAY"){
+    const {stay,delta}=state.linkedStay||{};
+    if(YES_RE.test(n)&&stay){state.intent="RESCHEDULE";return offerOptions(stay,addDays(stay.date,delta))}
+    if(NO_RE.test(n)){state.pending=null;state.state="IDLE";trail("AUTOMATE","Caller kept the hotel on its current dates.");return say("Okay, the hotel stays as it is. Is there anything else?")}
+    signal("redundant_clarification",5);return say("Should I move the hotel too? You can say yes or no.");
+  }
+  if(state.pending==="REFUND_IDENTIFY")return refundInfo(t);
+  if(state.pending==="DETAILS_IDENTIFY")return startDetails(t);
 
+  // New request: AI reads the words, rules decide what happens
   const ai=await geminiUnderstand(text);
-  const intent=ai?.intent||intentOf(text);
-  const routedText=applyAIHints(text,ai);
+  if(ai?.wants_agent&&state.state!=="HUMAN")return handoff("Sure. I'm connecting you to the travel desk now, and I'll pass along everything you've told me so you don't have to repeat it.","caller_requested_agent","Caller asked for a person (understood by AI).");
+  if(ai?.caller_upset&&!ESCALATION_RE.test(n)){signal("negative_tone",10);if(thresholdHandoff())return}
+  const intent=ai?.intent||intentOf(t);
+  const routedText=applyAIHints(t,ai);
   state.intent=intent;
   if(intent==="CANCEL")return startCancellation(routedText);
-  if(intent==="RESCHEDULE")return startReschedule(routedText);
+  if(intent==="RESCHEDULE")return startReschedule(routedText,ai);
   if(intent==="REFUND")return refundInfo(routedText);
   if(intent==="DETAILS")return startDetails(routedText);
   if(intent==="COMPANY_BOOKINGS")return showCompanyBookingsNextMonth();
   return unsupported();
 }
 
-function startCall(){if(state.active)return;resetSession();state.active=true;$("start").disabled=true;$("end").disabled=false;$("mic").disabled=false;$("mic").textContent="🎙 Speak";$("mute").disabled=false;$("dot").classList.add("live");$("status").textContent="Call in progress — you can speak or type";trail("AUTOMATE","Fresh call started; call state cleared.");say("Hi, welcome to My Travel. I can help with your flights, hotels, cancellations, rescheduling, or refunds. What would you like to take care of today?")}
-function endCall(){if(!state.active)return;state.active=false;if(recognition){try{recognition.abort()}catch(e){}}if("speechSynthesis" in window)speechSynthesis.cancel();$("start").disabled=false;$("end").disabled=true;$("mic").disabled=true;$("mic").textContent="🎙 Speak";$("mute").disabled=true;$("dot").classList.remove("live");$("status").textContent="Call ended";$('mic').textContent="🎙 Speak"}
+/* =========================
+   CALL CONTROLS, SPEECH INPUT, HANDS-FREE
+   ========================= */
+function startCall(){if(state.active)return;resetSession();state.active=true;state.callStart=Date.now();$("start").disabled=true;$("end").disabled=false;$("mic").disabled=false;$("mic").textContent="🎙 Speak";$("mute").disabled=false;$("dot").classList.add("live");$("status").textContent="Call in progress: speak or type";trail("AUTOMATE","New call started.");renderOutcome();
+  say("Hi, welcome to the ABC Company travel desk. I can help with your flights and hotel stays: booking details, cancellations, date changes and refunds. What would you like to do today?")}
+function endCall(){if(!state.active)return;state.active=false;state.callEnd=Date.now();if(recognition){try{recognition.abort()}catch(e){}}if("speechSynthesis" in window)speechSynthesis.cancel();$("start").disabled=false;$("end").disabled=true;$("mic").disabled=true;$("mic").textContent="🎙 Speak";$("mute").disabled=true;$("dot").classList.remove("live");$("status").textContent="Call ended";renderOutcome()}
 let recognition=null;
 let listening=false;
-function startListening(){
+function startListening(auto=false){
   if(!state.active){say("Please start the call first.");return}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   const secure=(window.isSecureContext===true||location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1');
-  if(!secure){
-    setFrustration(5);trail("CLARIFY","Voice input requires HTTPS or localhost.");
-    say("Voice input needs a secure connection. Please open the hosted version on HTTPS or use the local launcher.");return;
-  }
-  if(!SR){
-    setFrustration(5);trail("HUMAN","Browser speech recognition is unavailable.");
-    say("Voice input isn't available in this browser. Please use Chrome or Edge, or type your request below.");return;
-  }
+  if(!secure){signal("system_failure",15);trail("CLARIFY","Voice input needs HTTPS or localhost.");say("Voice input needs a secure connection. Please open the hosted version, or type your request below.");return}
+  if(!SR){signal("system_failure",15);trail("CLARIFY","Browser speech recognition is unavailable.");say("Voice input isn't available in this browser. Please use Chrome or Edge, or type your request below.");return}
   if(listening)return;
-  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  if('speechSynthesis' in window&&(speechSynthesis.speaking||speechSynthesis.pending)){speechSynthesis.cancel();if(!auto){signal("verbosity",5);trail("CLARIFY","Caller interrupted the bot (barge-in); bot stopped speaking.")}}
   const r=new SR();
   recognition=r;
-  r.lang='en-IN';
-  r.continuous=false;
-  r.interimResults=true;
-  r.maxAlternatives=3;
+  r.lang=state.lang==="hinglish"?'hi-IN':'en-IN';
+  r.continuous=false;r.interimResults=true;r.maxAlternatives=3;
   let captured='';
-  r.onstart=()=>{
-    listening=true;state.listening=true;
-    $("status").textContent='Listening… Speak now';
-    $("mic").textContent='🎙 Listening…';
-    $("mic").disabled=false;
-  };
-  r.onresult=e=>{
-    let finalText=''; let interim='';
-    for(let i=0;i<e.results.length;i++){
-      const chunk=e.results[i][0].transcript;
-      if(e.results[i].isFinal) finalText+=chunk; else interim+=chunk;
-    }
-    captured=(finalText+interim).trim();
-    if(captured){
-      $("status").textContent='Listening… “'+captured+'”';
-    }
-  };
+  r.onstart=()=>{listening=true;state.listening=true;$("status").textContent='Listening… speak now';$("mic").textContent='🎙 Listening…'};
+  r.onresult=e=>{let finalText='',interim='';for(let i=0;i<e.results.length;i++){const chunk=e.results[i][0].transcript;if(e.results[i].isFinal)finalText+=chunk;else interim+=chunk}
+    captured=(finalText+interim).trim();if(captured)$("status").textContent='Listening… "'+captured+'"'};
   r.onerror=e=>{
-    listening=false;state.listening=false;
-    $("mic").textContent='🎙 Speak';
-    $("mic").disabled=false;
+    listening=false;state.listening=false;$("mic").textContent='🎙 Speak';
     const err=e.error||'unknown';
+    if(err==='no-speech'){
+      state.silences=(state.silences||0)+1;trail('CLARIFY',`No speech heard (${state.silences}).`);
+      if(!state.handsFree)return say("I didn't hear anything. Press Speak and start talking, or type below.");
+      if(state.silences>=2){state.endAfterSpeech=true;return say("I haven't heard anything, so I'll end the call now. You can call back any time.")}
+      return say("Are you still there? Tell me what you need, or say \"agent\" to reach the travel desk.");
+    }
+    if(err==='aborted')return;
     const reasons={
-      'not-allowed':'Chrome is blocking speech recognition for this site. On Vercel, open the padlock/site settings for this exact website and allow Microphone, then reload the page.',
-      'service-not-allowed':'Chrome is not allowing its speech recognition service. Try Chrome/Edge, make sure you are online, and press Speak again.',
-      'audio-capture':'I cannot access a microphone. Check Chrome’s selected microphone and make sure another app is not using it.',
-      'no-speech':'I didn’t hear anything. Press Speak and start talking right away.',
-      'network':'Chrome could not reach its speech recognition service. Check your internet connection and try again.',
-      'aborted':'Listening stopped. Press Speak when you are ready.'
+      'not-allowed':'The browser is blocking the microphone for this site. Open the padlock or site settings, allow the microphone, then reload the page.',
+      'service-not-allowed':'The browser is not allowing its speech service. Try Chrome or Edge, make sure you are online, and press Speak again.',
+      'audio-capture':'I cannot access a microphone. Check the selected microphone and make sure another app is not using it.',
+      'network':'The browser could not reach its speech service. Check your internet connection and try again.'
     };
-    const msg=reasons[err]||('Voice input could not start ('+err+'). Please try Speak again or use the text box.');
-    setFrustration(err==='no-speech'?2:6);trail('CLARIFY',msg);
-    if(err!=='aborted')say(msg);
+    signal("system_failure",15);trail('CLARIFY',`Voice input error: ${err}.`);
+    say(reasons[err]||('Voice input could not start ('+err+'). Please try Speak again or type below.'));
   };
   r.onend=()=>{
     const wasCaptured=captured.trim();
-    listening=false;state.listening=false;
-    $("mic").textContent='🎙 Speak';
-    $("mic").disabled=false;
-    if(state.active) $("status").textContent='Call in progress — you can speak or type';
-    if(wasCaptured){
-      respond(wasCaptured);
-    }else if(!state.active){
-      return;
-    }
+    listening=false;state.listening=false;$("mic").textContent='🎙 Speak';
+    if(state.active)$("status").textContent='Call in progress: speak or type';
+    if(wasCaptured)respond(wasCaptured);
   };
-  try{r.start();}
-  catch(e){
-    listening=false;state.listening=false;
-    $("mic").textContent='🎙 Speak';$("mic").disabled=false;
-    if(e.name!=='InvalidStateError'){
-      trail('CLARIFY','Speech recognition could not start.');
-      say('I could not start voice input. Please press Speak again or use the text box.');
-    }
-  }
+  try{r.start()}
+  catch(e){listening=false;state.listening=false;$("mic").textContent='🎙 Speak';
+    if(e.name!=='InvalidStateError'){trail('CLARIFY','Speech recognition could not start.');say('I could not start voice input. Please press Speak again or type below.')}}
 }
 
-$("start").onclick=startCall;$("end").onclick=endCall;$("mic").onclick=startListening;
-$("mute").onclick=()=>{state.muted=!state.muted;$("mute").textContent=state.muted?"Unmute bot":"Mute bot"};
+$("start").onclick=startCall;$("end").onclick=endCall;$("mic").onclick=()=>startListening(false);
+$("mute").onclick=()=>{state.muted=!state.muted;$("mute").textContent=state.muted?"Unmute bot":"Mute bot";if(state.muted&&"speechSynthesis" in window)speechSynthesis.cancel()};
 $("send").onclick=()=>{const v=$("input").value.trim();if(!v)return;if(!state.active)startCall();$("input").value="";respond(v)};
-$("geminiModel").onchange=()=>{geminiModel=$("geminiModel").value;try{localStorage.setItem("voicebot_gemini_model",geminiModel);}catch(e){}};
 $("input").addEventListener("keydown",e=>{if(e.key==="Enter")$("send").click()});
-loadAISettings();
-USERS.forEach((u,i)=>{const o=document.createElement("option");o.value=i;o.textContent=`${u.name} • ${u.role}`;$("identity").appendChild(o)});
-$("identity").value=0;$("identity").onchange=()=>{state.user=USERS[+$("identity").value];resetSession();uiContext()};
-document.querySelectorAll('.scenario').forEach(x=>x.onclick=()=>{$("input").value=x.dataset.q;$("send").click()});
-uiContext();
+$("lang").onchange=()=>{state.lang=$("lang").value};
+$("handsfree").onchange=()=>{state.handsFree=$("handsfree").checked;if(state.handsFree&&state.active&&!listening&&!(("speechSynthesis" in window)&&speechSynthesis.speaking))startListening(true)};
+$("consoleToggle").onclick=()=>{const solo=$("grid").classList.toggle("solo");$("consoleToggle").textContent=solo?"Show agent console":"Hide agent console";$("consoleToggle").setAttribute("aria-pressed",String(!solo))};
+USERS.forEach((u,i)=>{const o=document.createElement("option");o.value=i;o.textContent=`${u.name} (${u.role})`;$("identity").appendChild(o)});
+$("identity").value=0;$("identity").onchange=()=>{endCall();state.user=USERS[+$("identity").value];resetSession();uiContext()};
+document.querySelectorAll('.scenario').forEach(x=>x.onclick=()=>{
+  if(x.dataset.user&&$("identity").value!==x.dataset.user){$("identity").value=x.dataset.user;$("identity").onchange()}
+  else if(!x.dataset.user&&$("identity").value!=="0"){$("identity").value="0";$("identity").onchange()}
+  $("input").value=x.dataset.q;$("send").click()});
+setInterval(()=>{if(state.active)renderOutcome()},1000);
+resetSession();uiContext();
 </script>
 
 <!-- How-to-use panel (hidden until opened) -->
 <div class="help-scrim" id="helpScrim"></div>
 <aside class="help" id="helpPanel" role="dialog" aria-modal="true" aria-labelledby="helpTitle" aria-hidden="true">
   <button class="x" id="helpClose" aria-label="Close instructions">✕</button>
-  <h2 id="helpTitle">How to use Voice Bot</h2>
+  <h2 id="helpTitle">How to use</h2>
   <h3>What it is</h3>
-  <p style="margin:0">A demo voice assistant for corporate travel after booking. It looks up flights and hotel stays, explains cancellation fees and refunds, cancels after you confirm, and hands you to a human for anything it shouldn't do alone, such as rescheduling. All bookings are sample data for ABC Company.</p>
-  <h3>Before you start</h3>
-  <ul>
-    <li>Use <b>Chrome or Edge</b> on a laptop for voice. Other browsers may only support typing.</li>
-    <li>When asked, <b>allow microphone access</b>.</li>
-    <li>Turn your volume up: the bot speaks its replies.</li>
-  </ul>
+  <p style="margin:0">A prototype voice assistant for corporate travellers after they've booked. It looks up flights and hotel stays, cancels after a confirmation, changes dates with the real fee and fare difference, checks the company's travel policy, and hands over to the travel desk with a ticket when it shouldn't act alone. All bookings, fares and policies are sample data for "ABC Company".</p>
+
   <h3>Steps</h3>
   <ol>
-    <li><b>Pick a demo caller</b> under "Demo caller / role":<br><b>Aarav Mehta (Employee)</b> sees only his own bookings.<br><b>Priya Shah (Central Booker)</b> can manage bookings for others.</li>
-    <li><b>Click "Start call".</b> The status dot turns green.</li>
-    <li><b>Talk or type.</b> Press <b>🎙 Speak</b> and talk naturally, or type in the box and press <b>Send</b>.</li>
-    <li><b>Follow the bot's questions.</b> It may ask which booking you mean, or ask you to confirm.</li>
-    <li><b>Click "End call"</b> when you're done. Use <b>Mute bot</b> to stop it speaking aloud.</li>
+    <li>Choose who's calling. <b>Aarav (Employee)</b> sees only his own bookings. <b>Priya (Central Booker)</b> can manage team and company bookings.</li>
+    <li>Pick <b>English</b> or <b>Hinglish</b>. In Hinglish the bot listens for Hindi and Hinglish and replies in Hinglish.</li>
+    <li>Click <b>Start call</b>, then press <b>🎙 Speak</b> or type. Turn on <b>Hands-free</b> to have it listen again by itself after each reply.</li>
+    <li>Press <b>Speak</b> while the bot is talking to interrupt it.</li>
   </ol>
-  <h3>Things to try</h3>
+
+  <h3>What it does on its own, and what it passes on</h3>
+  <table>
+    <tr><th>The bot handles</th><th>The travel desk gets</th></tr>
+    <tr><td>Booking details and refund status</td><td>Anything the caller isn't allowed to see</td></tr>
+    <tr><td>Cancellation, after stating the fee and re-checking the refund</td><td>Fee disputes it can't settle by explaining the fare rule, and any fee waiver</td></tr>
+    <tr><td>Date changes: new flight options, change fee plus fare difference, re-check before changing, and the linked hotel</td><td>Changes above ₹3,000 extra per traveller (sent to the manager for approval), bookings still pending approval, and changes within 24 hours of departure</td></tr>
+    <tr><td></td><td>Anyone who asks for a person, and calls where frustration reaches 75</td></tr>
+  </table>
+
+  <h3>The agent console</h3>
+  <p style="margin:0">The right-hand side is what a travel desk agent would see, not the caller. <b>Frustration score</b> adds points for each cause (repeating, wrong picks, angry words, fee disputes, long calls) and takes points off when a step succeeds. At 50 the bot offers a person; at 75 it hands over. It reads words, not tone of voice. <b>Handoff ticket</b> is what the agent receives, so the caller never has to repeat themselves.</p>
+
+  <h3>How success is measured</h3>
   <ul>
-    <li>"What all bookings do I have?"</li>
-    <li>"Show my flights" or "Show my stays"</li>
-    <li>"Cancel my Hyderabad flight": it states the fee and refund and asks you to confirm first.</li>
-    <li>"Reschedule my Hyderabad flight to next week": it passes you to the travel desk.</li>
-    <li>"Can you get rid of my Bombay flight?": shows it understands everyday phrasing.</li>
-    <li>Or click any <b>Quick test scenario</b> button.</li>
+    <li><b>Safe autonomous resolution rate:</b> share of all calls the bot fully resolves with no critical error, no repeat call within 7 days and no reversal.</li>
+    <li>Always reported with: critical errors (target 0), missed handoffs (under 2%), and repeat contacts.</li>
+    <li><b>Test results so far</b> (scripted test calls on sample data, not real traffic): 153 scripted calls with no wrong cancellations and no access errors. Handoffs fell from 65 to 45, because date changes and most fee disputes no longer need a person. 27 more tests cover the new flows.</li>
   </ul>
-  <h3>What the right-hand panels show</h3>
+
+  <h3>What a real launch would need</h3>
   <ul>
-    <li><b>Call context:</b> who's calling, their role, what they want, the current step, the booking found, and the bot's decision.</li>
-    <li><b>Frustration score:</b> 0 to 100. It rises when the bot has to repeat itself, or when you disagree with a fee.</li>
-    <li><b>Decision trail:</b> each step with its reason, tagged <span class="tag t-auto">AUTOMATE</span> bot handled it, <span class="tag t-clar">CLARIFY</span> bot asked a question, or <span class="tag t-hum">HUMAN</span> handed to a person.</li>
+    <li><b>Phone line:</b> telephony (Exotel or Twilio) with streaming speech for low delay, interruptions, noisy lines and Indian accents.</li>
+    <li><b>Booking systems:</b> a GDS or the booking tool (Amadeus, Sabre or the TMC's system). Quotes are estimates; the bot re-checks the price right before acting and asks again if it changed.</li>
+    <li><b>Multi-city trips:</b> before cancelling or changing, the bot reads back the exact flight or hotel and gets a clear yes.</li>
+    <li><b>Policy and approvals:</b> the company's real travel policy and approval workflow in place of the sample rules.</li>
+    <li><b>Audit:</b> every action logged with what the caller was told, for disputes and liability.</li>
   </ul>
-  <h3>Good to know</h3>
-  <div class="note">It never cancels without your confirmation. Rescheduling, requests outside travel, and access it isn't allowed are passed to a human. Bookings, fares and refunds are invented for the demo.</div>
+  <div class="note">Nothing here touches real bookings. Fares, fees, flight options and the re-check price changes are simulated to show how the bot behaves.</div>
 </aside>
+
 <script>
 (function(){
   const panel=document.getElementById("helpPanel"),scrim=document.getElementById("helpScrim"),btn=document.getElementById("helpOpen"),x=document.getElementById("helpClose");
