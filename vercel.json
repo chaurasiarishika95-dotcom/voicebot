@@ -1,1 +1,1 @@
-{ "functions": { "api/policy.js": { "includeFiles": "data/**" } } }
+{ "functions": { "api/policy.js": { "includeFiles": "data/**", "maxDuration": 30 }, "api/gemini.js": { "maxDuration": 30 }, "api/tts.js": { "maxDuration": 30 } } }
