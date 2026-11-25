@@ -112,6 +112,12 @@
           <div class="kv"><small>Booking</small><b id="cBooking">—</b></div>
           <div class="kv"><small>Last decision</small><b id="cDecision">—</b></div>
         </div>
+        <div class="ai-line" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">
+          <label for="geminiModel" style="font-size:12px">Gemini model</label>
+          <select id="geminiModel" style="padding:6px 8px;border:1px solid #d8dee8;border-radius:8px;background:#fff;font:inherit;font-size:12px">
+            <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (default)</option><option value="gemini-3.5-flash">Gemini 3.5 Flash</option><option value="gemini-3.8-flash">Gemini 3.8 Flash</option>
+          </select>
+        </div>
         <div class="ai-line" id="aiStatus">Language understanding: Gemini, with a rule-based fallback</div>
       </section>
 
@@ -483,7 +489,7 @@ function startTyping(){
 function stopTyping(){if(typingTimer){clearTimeout(typingTimer);typingTimer=null}}
 
 // 4) Natural voice playback (Gemini TTS) with a phone-line sound; falls back to the browser voice.
-let currentAudio=null,ttsPending=0;
+let currentAudio=null,ttsPending=0,speechSeq=0;
 function phoneLine(audio){
   const ctx=audioCtx();if(!ctx)return;
   try{const src=ctx.createMediaElementSource(audio),hp=ctx.createBiquadFilter(),lp=ctx.createBiquadFilter(),g=ctx.createGain();
@@ -491,7 +497,7 @@ function phoneLine(audio){
     src.connect(hp).connect(lp).connect(g).connect(ctx.destination);}catch(e){}
 }
 function botSpeaking(){return ("speechSynthesis" in window&&(speechSynthesis.speaking||speechSynthesis.pending))||(currentAudio&&!currentAudio.paused&&!currentAudio.ended)||ttsPending>0}
-function stopVoice(){if("speechSynthesis" in window)speechSynthesis.cancel();if(currentAudio){currentAudio.pause();currentAudio=null}stopTyping()}
+function stopVoice(){speechSeq++;if("speechSynthesis" in window)speechSynthesis.cancel();if(currentAudio){currentAudio.pause();currentAudio=null}stopTyping()}
 function browserSpeak(text){
   if(!("speechSynthesis" in window)){afterSpeech();return}
   try{
@@ -501,14 +507,14 @@ function browserSpeak(text){
   }catch(e){afterSpeech()}
 }
 async function naturalSpeak(text){
-  ttsPending++;startTyping();
+  const mySeq=speechSeq;ttsPending++;startTyping();
   try{
     const ctrl=new AbortController(),tm=setTimeout(()=>ctrl.abort(),14000);
     const res=await fetch("/api/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:withPauses(spokenText(text)),style:voiceStyle()}),signal:ctrl.signal});
     clearTimeout(tm);
     const data=await res.json().catch(()=>({}));
     if(!res.ok||!data.audio)throw new Error(data.error||`TTS ${res.status}`);
-    if(!state.active||state.muted){ttsPending--;stopTyping();afterSpeech();return}
+    if(!state.active||state.muted||mySeq!==speechSeq){ttsPending--;stopTyping();if(mySeq===speechSeq)afterSpeech();return}
     const a=new Audio(`data:${data.mime||"audio/wav"};base64,${data.audio}`);
     if($("phoneline")?.checked)phoneLine(a);
     currentAudio=a;ttsPending--;stopTyping();
@@ -518,6 +524,7 @@ async function naturalSpeak(text){
     $("voiceStatus").textContent=`Voice: Gemini ${data.voice||""} (${data.model||"TTS"})${data.cached?" · cached":""}`;
   }catch(e){
     ttsPending=Math.max(0,ttsPending-1);stopTyping();
+    if(mySeq!==speechSeq)return;
     $("voiceStatus").textContent="Voice: browser voice (natural voice unavailable)";
     trail("CLARIFY",`Natural voice unavailable; browser voice used (${e.message}).`);
     browserSpeak(text);
@@ -987,17 +994,28 @@ function refundInfoFor(b){
    AI understands the words; the rules above still control access, policy, fees, refunds,
    every change to a booking and every handoff.
    ========================= */
-async function callAI(prompt,timeoutMs=9000){
+// Model picker: the chosen model is tried first; the server falls back down this list if it fails.
+const GEMINI_MODELS=["gemini-3.5-flash-lite","gemini-3.5-flash","gemini-3.8-flash"];
+let geminiModel=(()=>{let m=null;try{m=localStorage.getItem("voicebot_gemini_model")}catch(e){}return GEMINI_MODELS.includes(m)?m:GEMINI_MODELS[0]})();
+let lastModelUsed=null;
+async function callAI(prompt,timeoutMs=25000){
+  // The client waits longer than the server's whole fallback chain, so a slow first model
+  // can still fall back to the next one instead of the browser giving up first.
   const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),timeoutMs);
   try{
-    const res=await fetch("/api/gemini",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt}),signal:ctrl.signal});
+    const res=await fetch("/api/gemini",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt,model:geminiModel}),signal:ctrl.signal});
     const data=await res.json().catch(()=>({}));
     if(!res.ok)throw new Error(data.error||`AI service ${res.status}`);
     if(!data?.result||typeof data.result!=="object")throw new Error("Invalid AI response");
+    lastModelUsed=data.modelUsed||geminiModel;
+    if(lastModelUsed!==geminiModel)trail("CLARIFY",`${geminiModel} failed (${(data.tried||[]).join(" | ")||"no reply"}); fell back to ${lastModelUsed}.`);
     return data.result;
+  }catch(e){
+    if(e?.name==="AbortError")throw new Error(`no reply from any Gemini model within ${timeoutMs/1000}s`);
+    throw e;
   }finally{clearTimeout(t)}
 }
-function updateAIStatus(ok){$("aiStatus").textContent=ok?"Language understanding: Gemini (rules decide every action)":"Language understanding: AI unavailable, rule-based fallback in use";$("aiStatus").style.color=ok?"#147a42":"#8a5a00"}
+function updateAIStatus(ok){$("aiStatus").textContent=ok?`Language understanding: ${lastModelUsed||geminiModel}${lastModelUsed&&lastModelUsed!==geminiModel?" (fallback)":""} (rules decide every action)`:"Language understanding: AI unavailable, rule-based fallback in use";$("aiStatus").style.color=ok?"#147a42":"#8a5a00"}
 async function geminiUnderstand(text){
   const caller=state.user;
   const accessible=accessibleBookings().map(b=>({booking_id:b.pnr,type:b.type,from:b.from||null,to:b.to||null,stay:b.stayName||null,date:b.date,date_label:b.dateLabel||null,status:b.status,traveler:b.traveler,booking_for:b.bookingFor||null,travelers:b.travelers||1}));
@@ -1021,7 +1039,7 @@ caller_upset: true only if the words clearly show anger or frustration
 confidence: number from 0 to 1
 reason: short explanation
 
-Rules: never invent a booking. "cancel/get rid of/drop/raddh" means CANCEL. "move/change/push/shift/aage/peeche/date badalni" means RESCHEDULE. "money back/refund/paise wapas" means REFUND. "what all/my bookings/my flights/my stays/dikhao" means DETAILS with wants_all=true. Company-wide requests are COMPANY_BOOKINGS. General questions about travel rules that do not act on a booking (baggage, check-in, ID, name corrections, class of travel, approval limits, hotel limits or check-in times, meal allowance, cabs, insurance, how long refunds take in general) are POLICY, for example "kitna saman le ja sakte hain" or "hotel ka check-in kab hai".
+Rules: never invent a booking. "cancel/get rid of/drop/raddh" means CANCEL. "move/change/push/shift/aage/peeche/date badalni" means RESCHEDULE. "money back/refund/paise wapas" means REFUND. "what all/my bookings/my flights/my stays/dikhao" means DETAILS with wants_all=true. Company-wide requests are COMPANY_BOOKINGS. General questions about travel rules that do not act on a booking (baggage, check-in, ID, name corrections, class of travel, approval limits, hotel limits or check-in times, meal allowance, cabs, insurance, how long refunds take in general) are POLICY. Anything about the caller's own refund, such as "I want a refund", "refund my flight", "where is my refund" or "mera refund chahiye", is REFUND, not POLICY, for example "kitna saman le ja sakte hain" or "hotel ka check-in kab hai".
 User: ${JSON.stringify(text)}`;
   try{
     const parsed=await callAI(prompt);updateAIStatus(true);
@@ -1069,7 +1087,7 @@ function renderPolicyTrace(q,r,via){
 async function keywordPolicy(q){
   // Rule-based fallback when the RAG service is down: keyword overlap over the same policy sections.
   if(!POLICY_CHUNKS){const r=await fetch("/data/policy-chunks.json");POLICY_CHUNKS=await r.json()}
-  const STOP=new Set("the a an and of to in on for with is are was what how can i my do does it be or at by from much many when".split(" "));
+  const STOP=new Set("the a an and of to in on for with is are was what how can i my do does it be or at by from much many when long take takes get will need there any".split(" "));
   const tok=x=>new Set((x.toLowerCase().match(/[a-z0-9₹]+/g)||[]).filter(w=>!STOP.has(w)).map(w=>w.length>4?w.replace(/(ing|ed|es|s)$/,""):w));
   const qs=tok(q);const hits=POLICY_CHUNKS.map(c=>{const cs=tok(c.text);let o=0;qs.forEach(w=>{if(cs.has(w))o++});return{...c,score:qs.size?o/qs.size:0}}).sort((a,b)=>b.score-a.score).slice(0,3);
   const MIN=0.4,top=hits[0];
@@ -1215,7 +1233,13 @@ async function respond(text){
   const ai=await geminiUnderstand(text);
   if(ai?.wants_agent&&state.state!=="HUMAN")return handoff("Sure. I'm connecting you to the travel desk now, and I'll pass along everything you've told me so you don't have to repeat it.","caller_requested_agent","Caller asked for a person (understood by AI).");
   if(ai?.caller_upset&&!ESCALATION_RE.test(n)){signal("negative_tone",10);if(thresholdHandoff())return}
-  const intent=ai?.intent||intentOf(t);
+  const ruleIntent=intentOf(t);
+  let intent=ai?.intent||ruleIntent;
+  // Guardrail: a request about the caller's own booking (refund, cancel, date change, details) is never
+  // answered from the general policy documents, even if the AI labels it POLICY.
+  if(intent==="POLICY"&&["REFUND","CANCEL","RESCHEDULE","DETAILS"].includes(ruleIntent)){
+    trail("CLARIFY",`AI said POLICY, but the rules read a ${ruleIntent} request for the caller's own booking; following the rules.`);intent=ruleIntent;
+  }
   const routedText=applyAIHints(t,ai);
   state.intent=intent;
   if(intent==="CANCEL")return startCancellation(routedText);
@@ -1286,6 +1310,8 @@ $("mute").onclick=()=>{state.muted=!state.muted;$("mute").textContent=state.mute
 $("send").onclick=()=>{const v=$("input").value.trim();if(!v)return;if(!state.active)startCall();$("input").value="";respond(v)};
 $("input").addEventListener("keydown",e=>{if(e.key==="Enter")$("send").click()});
 $("lang").onchange=()=>{state.lang=$("lang").value};
+$("geminiModel").value=geminiModel;
+$("geminiModel").onchange=()=>{geminiModel=$("geminiModel").value;lastModelUsed=null;try{localStorage.setItem("voicebot_gemini_model",geminiModel)}catch(e){}trail("AUTOMATE",`Gemini model set to ${geminiModel}; the others stay as fallbacks.`)};
 $("ambience").onchange=()=>{if($("ambience").checked){if(state.active&&!state.muted)startAmbience()}else stopAmbience()};
 $("naturalVoice").onchange=()=>{$("voiceStatus").textContent=$("naturalVoice").checked?"Voice: Gemini natural voice":"Voice: browser voice"};
 $("handsfree").onchange=()=>{state.handsFree=$("handsfree").checked;if(state.handsFree&&state.active&&!listening&&!botSpeaking())startListening(true)};
