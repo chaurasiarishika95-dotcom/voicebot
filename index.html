@@ -506,14 +506,31 @@ function browserSpeak(text){
     u.rate=.9;u.pitch=1.0;u.volume=1;u.onend=afterSpeech;speechSynthesis.speak(u);
   }catch(e){afterSpeech()}
 }
-async function naturalSpeak(text){
+// Audio cache: the greeting is generated in the background when the page loads,
+// so the call starts speaking straight away instead of waiting for Gemini TTS.
+const ttsCache=new Map();
+function ttsKey(text){return voiceStyle()+"|"+text}
+function fetchTTS(text){
+  const key=ttsKey(text);
+  if(ttsCache.has(key))return ttsCache.get(key);
+  const p=(async()=>{
+    const ctrl=new AbortController(),tm=setTimeout(()=>ctrl.abort(),14000);
+    try{
+      const res=await fetch("/api/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:withPauses(spokenText(text)),style:voiceStyle()}),signal:ctrl.signal});
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok||!data.audio)throw new Error(data.error||`TTS ${res.status}`);
+      return data;
+    }finally{clearTimeout(tm)}
+  })();
+  ttsCache.set(key,p);
+  p.catch(()=>ttsCache.delete(key)); // a failed fetch can be retried later
+  return p;
+}
+function withTimeout(p,ms){return Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error(`natural voice not ready in ${ms/1000}s`)),ms))])}
+async function naturalSpeak(text,maxWaitMs=14000){
   const mySeq=speechSeq;ttsPending++;startTyping();
   try{
-    const ctrl=new AbortController(),tm=setTimeout(()=>ctrl.abort(),14000);
-    const res=await fetch("/api/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:withPauses(spokenText(text)),style:voiceStyle()}),signal:ctrl.signal});
-    clearTimeout(tm);
-    const data=await res.json().catch(()=>({}));
-    if(!res.ok||!data.audio)throw new Error(data.error||`TTS ${res.status}`);
+    const data=await withTimeout(fetchTTS(text),maxWaitMs);
     if(!state.active||state.muted||mySeq!==speechSeq){ttsPending--;stopTyping();if(mySeq===speechSeq)afterSpeech();return}
     const a=new Audio(`data:${data.mime||"audio/wav"};base64,${data.audio}`);
     if($("phoneline")?.checked)phoneLine(a);
@@ -525,14 +542,14 @@ async function naturalSpeak(text){
   }catch(e){
     ttsPending=Math.max(0,ttsPending-1);stopTyping();
     if(mySeq!==speechSeq)return;
-    $("voiceStatus").textContent="Voice: browser voice (natural voice unavailable)";
+    $("voiceStatus").textContent=/not ready/.test(e.message)?"Voice: browser voice for this line (natural voice still loading)":"Voice: browser voice (natural voice unavailable)";
     trail("CLARIFY",`Natural voice unavailable; browser voice used (${e.message}).`);
     browserSpeak(text);
   }
 }
-function speak(text){
+function speak(text,maxWaitMs){
   if(!state.active||state.muted){stopTyping();afterSpeech();return}
-  if($("naturalVoice")?.checked)return naturalSpeak(text);
+  if($("naturalVoice")?.checked)return naturalSpeak(text,maxWaitMs);
   stopTyping();browserSpeak(text);
 }
 function afterSpeech(){
@@ -1255,7 +1272,28 @@ async function respond(text){
    CALL CONTROLS, SPEECH INPUT, HANDS-FREE
    ========================= */
 function startCall(){if(state.active)return;resetSession();state.active=true;startAmbience();state.callStart=Date.now();$("start").disabled=true;$("end").disabled=false;$("mic").disabled=false;$("mic").textContent="🎙 Speak";$("mute").disabled=false;$("dot").classList.add("live");$("status").textContent="Call in progress: speak or type";trail("AUTOMATE","New call started.");renderOutcome();
-  say("Hi, welcome to the ABC Company travel desk. I'm the virtual assistant. I can help with your flights and hotel stays: booking details, cancellations, date changes, refunds and travel policy questions. What would you like to do today?")}
+  sayGreeting()}
+const GREETING={
+  en:"Hi, welcome to the ABC Company travel desk. I'm the virtual assistant. I can help with your flights and hotel stays: booking details, cancellations, date changes, refunds and travel policy questions. What would you like to do today?",
+  hinglish:"Hi, ABC Company travel desk mein aapka swagat hai. Main virtual assistant hoon. Main aapki flights aur hotel stays mein help kar sakti hoon: booking details, cancellation, date change, refund aur travel policy ke sawaal. Aaj main aapki kya help karun?"
+};
+function greetingText(){return state.lang==="hinglish"?GREETING.hinglish:GREETING.en}
+function sayGreeting(){
+  // Fixed text, so it skips the Hinglish rewrite and uses the audio prepared at page load.
+  const text=greetingText();
+  const d=document.createElement("div");d.className="msg";d.innerHTML='<div class="bubble bot"></div>';d.querySelector(".bubble").textContent=text;
+  $("transcript").appendChild(d);scrollT();
+  speak(text,3000); // if the natural voice is not ready within 3 s, the browser voice says the greeting
+}
+function prepareGreeting(){
+  if(!$("naturalVoice")?.checked)return;
+  fetchTTS(greetingText()).then(()=>{if(!state.active)$("voiceStatus").textContent="Voice: Gemini natural voice (greeting ready)"}).catch(()=>{});
+}
+function warmUp(){
+  // Wake the serverless functions before the first call so the first reply is not slowed by a cold start.
+  ["/api/gemini","/api/policy"].forEach(u=>fetch(u,{method:"GET"}).catch(()=>{}));
+  prepareGreeting();
+}
 function endCall(){if(!state.active)return;state.active=false;state.callEnd=Date.now();if(recognition){try{recognition.abort()}catch(e){}}stopVoice();stopAmbience();$("start").disabled=false;$("end").disabled=true;$("mic").disabled=true;$("mic").textContent="🎙 Speak";$("mute").disabled=true;$("dot").classList.remove("live");$("status").textContent="Call ended";renderOutcome()}
 let recognition=null;
 let listening=false;
@@ -1309,11 +1347,12 @@ $("start").onclick=startCall;$("end").onclick=endCall;$("mic").onclick=()=>start
 $("mute").onclick=()=>{state.muted=!state.muted;$("mute").textContent=state.muted?"Unmute bot":"Mute bot";if(state.muted){stopVoice();stopAmbience()}else if(state.active)startAmbience()};
 $("send").onclick=()=>{const v=$("input").value.trim();if(!v)return;if(!state.active)startCall();$("input").value="";respond(v)};
 $("input").addEventListener("keydown",e=>{if(e.key==="Enter")$("send").click()});
-$("lang").onchange=()=>{state.lang=$("lang").value};
+$("lang").onchange=()=>{state.lang=$("lang").value;prepareGreeting()};
 $("geminiModel").value=geminiModel;
 $("geminiModel").onchange=()=>{geminiModel=$("geminiModel").value;lastModelUsed=null;try{localStorage.setItem("voicebot_gemini_model",geminiModel)}catch(e){}trail("AUTOMATE",`Gemini model set to ${geminiModel}; the others stay as fallbacks.`)};
 $("ambience").onchange=()=>{if($("ambience").checked){if(state.active&&!state.muted)startAmbience()}else stopAmbience()};
-$("naturalVoice").onchange=()=>{$("voiceStatus").textContent=$("naturalVoice").checked?"Voice: Gemini natural voice":"Voice: browser voice"};
+$("naturalVoice").onchange=()=>{$("voiceStatus").textContent=$("naturalVoice").checked?"Voice: Gemini natural voice":"Voice: browser voice";prepareGreeting()};
+warmUp();
 $("handsfree").onchange=()=>{state.handsFree=$("handsfree").checked;if(state.handsFree&&state.active&&!listening&&!botSpeaking())startListening(true)};
 $("consoleToggle").onclick=()=>{const solo=$("grid").classList.toggle("solo");$("consoleToggle").textContent=solo?"Show agent console":"Hide agent console";$("consoleToggle").setAttribute("aria-pressed",String(!solo))};
 USERS.forEach((u,i)=>{const o=document.createElement("option");o.value=i;o.textContent=`${u.name} (${u.role})`;$("identity").appendChild(o)});
