@@ -1,0 +1,92 @@
+[
+  {
+    "id": "01-flights#0",
+    "source": "ABC Company travel policy: flights (sample data)",
+    "section": "Class of travel",
+    "text": "ABC Company travel policy: flights (sample data) — Class of travel: All domestic flights are booked in Economy. Business class is allowed only for flights longer than 6 hours, with approval from a Vice President."
+  },
+  {
+    "id": "01-flights#1",
+    "source": "ABC Company travel policy: flights (sample data)",
+    "section": "When to book",
+    "text": "ABC Company travel policy: flights (sample data) — When to book: Book flights at least 7 days before travel where possible. Bookings made less than 48 hours before departure need a short note from the traveller's manager explaining why."
+  },
+  {
+    "id": "01-flights#2",
+    "source": "ABC Company travel policy: flights (sample data)",
+    "section": "Approval for extra cost",
+    "text": "ABC Company travel policy: flights (sample data) — Approval for extra cost: Any change that adds more than ₹3,000 per traveller (change fee plus fare difference) needs the manager's approval before the travel desk confirms it. Changes up to ₹3,000 per traveller can be made directly."
+  },
+  {
+    "id": "01-flights#3",
+    "source": "ABC Company travel policy: flights (sample data)",
+    "section": "Changes close to departure",
+    "text": "ABC Company travel policy: flights (sample data) — Changes close to departure: Date changes within 24 hours of departure are handled by the travel desk, not the assistant, because seat availability and fees change quickly."
+  },
+  {
+    "id": "02-airport#4",
+    "source": "Airport and airline rules (sample data)",
+    "section": "Baggage allowance (luggage)",
+    "text": "Airport and airline rules (sample data) — Baggage allowance (luggage): On domestic Economy fares, each traveller can carry one cabin bag up to 7 kg and check in one bag (checked luggage) up to 15 kg. Extra baggage is paid by the company only if the trip needs it, for example equipment for a client visit, and the manager approves it before travel."
+  },
+  {
+    "id": "02-airport#5",
+    "source": "Airport and airline rules (sample data)",
+    "section": "Web check-in",
+    "text": "Airport and airline rules (sample data) — Web check-in: Web check-in opens 48 hours before departure and closes 60 minutes before departure. Airport check-in counters close 45 minutes before departure. Travellers should reach the airport at least 2 hours before a domestic flight."
+  },
+  {
+    "id": "02-airport#6",
+    "source": "Airport and airline rules (sample data)",
+    "section": "ID needed at the airport",
+    "text": "Airport and airline rules (sample data) — ID needed at the airport: Carry a valid government photo ID, such as Aadhaar, passport, driving licence or voter ID. The name on the ID must match the name on the ticket."
+  },
+  {
+    "id": "02-airport#7",
+    "source": "Airport and airline rules (sample data)",
+    "section": "Name corrections",
+    "text": "Airport and airline rules (sample data) — Name corrections: Names on tickets cannot be changed to a different person. A small spelling correction of up to 3 letters can be requested through the travel desk. Anything larger means cancelling and booking again, and the cancellation fee applies."
+  },
+  {
+    "id": "03-hotels#8",
+    "source": "ABC Company travel policy: hotels (sample data)",
+    "section": "Approved hotels and nightly limits",
+    "text": "ABC Company travel policy: hotels (sample data) — Approved hotels and nightly limits: Book company-approved hotels. The nightly limit including taxes is ₹7,000 in Bangalore, ₹8,000 in Delhi, ₹8,500 in Bombay and ₹6,500 in Hyderabad. Stays above the limit need the manager's approval."
+  },
+  {
+    "id": "03-hotels#9",
+    "source": "ABC Company travel policy: hotels (sample data)",
+    "section": "Hotel check-in and check-out times",
+    "text": "ABC Company travel policy: hotels (sample data) — Hotel check-in and check-out times: At the hotel, standard check-in is 2 pm and check-out is 12 noon. Early check-in and late check-out depend on availability, and the hotel may charge for half a day."
+  },
+  {
+    "id": "03-hotels#10",
+    "source": "ABC Company travel policy: hotels (sample data)",
+    "section": "Hotel changes and cancellations",
+    "text": "ABC Company travel policy: hotels (sample data) — Hotel changes and cancellations: Hotel stays can usually be cancelled free up to 24 hours before check-in. After that, the hotel may charge one night. If a flight date changes, the linked hotel stay should be moved too."
+  },
+  {
+    "id": "04-money#11",
+    "source": "Refunds, expenses and insurance (sample data)",
+    "section": "Refund timelines",
+    "text": "Refunds, expenses and insurance (sample data) — Refund timelines: Refunds for cancelled flights and hotels go back to the company card used for the booking, usually within 5 to 7 working days. Non-refundable fares may return only taxes and fees."
+  },
+  {
+    "id": "04-money#12",
+    "source": "Refunds, expenses and insurance (sample data)",
+    "section": "Meals and daily allowance",
+    "text": "Refunds, expenses and insurance (sample data) — Meals and daily allowance: Travellers get a daily allowance of ₹1,500 for meals on domestic trips. Alcohol is not reimbursed."
+  },
+  {
+    "id": "04-money#13",
+    "source": "Refunds, expenses and insurance (sample data)",
+    "section": "Local travel",
+    "text": "Refunds, expenses and insurance (sample data) — Local travel: Airport and local cabs booked through the company cab app are paid directly. Other local travel can be claimed with receipts."
+  },
+  {
+    "id": "04-money#14",
+    "source": "Refunds, expenses and insurance (sample data)",
+    "section": "Travel insurance",
+    "text": "Refunds, expenses and insurance (sample data) — Travel insurance: All employees are covered by the company's group travel insurance for work trips. Report any incident to the travel desk within 48 hours."
+  }
+]
