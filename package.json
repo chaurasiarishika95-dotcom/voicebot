@@ -1,0 +1,11 @@
+{
+  "name": "travel-voicebot",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "policy:chunks": "node scripts/build-policy-chunks.mjs",
+    "test": "node tests/policy.test.mjs",
+    "policy:eval": "node scripts/policy-eval.mjs"
+  },
+  "engines": { "node": ">=18" }
+}

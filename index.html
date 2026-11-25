@@ -13,6 +13,7 @@
 .card{background:#fff;border:1px solid #e2e7ef;border-radius:14px;box-shadow:0 4px 18px #1b2a3a0b}.pad{padding:18px}
 .callbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.btn{border:0;border-radius:9px;padding:10px 15px;font-weight:700;cursor:pointer;font:inherit;font-weight:700}.primary{background:#172033;color:#fff}.secondary{background:#edf1f7;color:#172033}.danger{background:#fff0f0;color:#a33}.btn:disabled{opacity:.45;cursor:not-allowed}
 .status{display:flex;align-items:center;gap:8px;font-size:13px;color:#68738a}.dot{width:9px;height:9px;border-radius:50%;background:#b6bfcc;flex:none}.dot.live{background:#18a957}
+.voiceopts{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;margin-top:10px;font-size:13px}.voiceopts .vstatus{font-size:11.5px;color:#68738a}
 .options{margin-top:14px;display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;align-items:end}.field label{display:block;font-size:11px;font-weight:700;color:#68738a;margin-bottom:5px;text-transform:uppercase}.field select{width:100%;padding:10px;border:1px solid #d8dee8;border-radius:8px;background:#fff;font:inherit;font-size:14px}
 .toggle{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:10px 4px;cursor:pointer;white-space:nowrap}.toggle input{width:16px;height:16px}
 .transcript{height:430px;overflow:auto;border:1px solid #e4e8ef;border-radius:10px;padding:12px;background:#fbfcfe}.msg{margin:8px 0;display:flex}.bubble{max-width:82%;padding:10px 12px;border-radius:11px;white-space:pre-line;font-size:14px;line-height:1.45}.bot{background:#edf4ff}.bot.pending{color:#788298}.user{margin-left:auto;background:#172033;color:#fff}
@@ -23,6 +24,7 @@
 #console .card+.card{margin-top:14px}#console h3{margin:0 0 12px;font-size:14px}
 .context{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kv{border:1px solid #e6eaf0;border-radius:9px;padding:9px 10px;min-width:0}.kv small{display:block;color:#788298;font-size:10px;text-transform:uppercase;font-weight:700}.kv b{font-size:13px;overflow-wrap:anywhere}
 .ai-line{font-size:11.5px;color:#68738a;margin-top:10px}
+.pol{font-size:12px;line-height:1.45}.pol .q{font-weight:600;margin-bottom:6px}.pol .hit{display:grid;grid-template-columns:1fr 90px 36px;gap:8px;align-items:center;padding:3px 0}.pol .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pol .tr{height:6px;background:#eef1f5;border-radius:3px;overflow:hidden}.pol .fl{height:100%;background:#9fb0cc}.pol .hit.used .fl{background:#1f3864}.pol .sc{text-align:right;color:#68738a;font-variant-numeric:tabular-nums}.pol .meta{color:#68738a;margin-top:6px}.pol .why{color:#8a5a00;margin-top:4px}
 .fr-row{display:flex;align-items:baseline;gap:10px}.fr-num{font-size:30px;font-weight:750}.fr-label{font-size:11px;color:#788298}
 .fr-track{position:relative;height:9px;background:#edf0f4;border-radius:99px;margin:8px 0 4px}.fr-fill{height:100%;width:0;background:#2f7a5d;border-radius:99px;transition:width .25s ease,background .25s ease}
 .fr-mark{position:absolute;top:-3px;width:2px;height:15px;background:#9aa4b5}.fr-scale{position:relative;height:14px;font-size:10px;color:#788298}.fr-scale span{position:absolute;transform:translateX(-50%);white-space:nowrap}
@@ -53,7 +55,7 @@
 <body>
 <div class="app">
   <div class="top">
-    <div class="brand"><h1>Travel Desk Voice Assistant</h1><p>Post-booking help for corporate travellers: bookings, cancellations, date changes and refunds</p></div>
+    <div class="brand"><h1>Travel Desk Voice Assistant</h1><p>Post-booking help for corporate travellers: bookings, cancellations, date changes, refunds and travel policy</p></div>
     <div class="top-right"><button class="helpbtn" id="consoleToggle" aria-pressed="true">Hide agent console</button><button class="helpbtn" id="helpOpen" aria-controls="helpPanel" aria-expanded="false">ⓘ How to use</button><div class="badge">PROTOTYPE · SAMPLE DATA</div></div>
   </div>
 
@@ -72,6 +74,12 @@
         <div class="field"><label for="lang">Language</label><select id="lang"><option value="en">English (India)</option><option value="hinglish">Hinglish</option></select></div>
         <label class="toggle" title="The bot listens again by itself after it finishes speaking"><input type="checkbox" id="handsfree"> Hands-free</label>
       </div>
+      <div class="voiceopts">
+        <label class="toggle" title="Gemini text-to-speech with natural pauses and pronunciation. Falls back to the browser voice."><input type="checkbox" id="naturalVoice" checked> Natural voice</label>
+        <label class="toggle" title="Faint office room tone, and keyboard typing while the assistant looks things up"><input type="checkbox" id="ambience" checked> Call ambience</label>
+        <label class="toggle" title="Makes the voice sound like a phone line"><input type="checkbox" id="phoneline" checked> Phone-line sound</label>
+        <span class="vstatus" id="voiceStatus">Voice: Gemini natural voice</span>
+      </div>
 
       <div id="transcript" class="transcript" style="margin-top:14px" aria-live="polite"></div>
       <div class="inputrow"><input id="input" placeholder="Type here, or press Speak and talk" aria-label="Message"><button class="btn primary" id="send">Send</button></div>
@@ -87,6 +95,8 @@
         <button class="scenario" data-q="Where is my refund for the Delhi flight?">Where is my refund for the Delhi flight?<small>Refund status</small></button>
         <button class="scenario" data-q="This is useless, I want to talk to a real person">This is useless, I want a real person<small>Instant handoff with a ticket</small></button>
         <button class="scenario" data-q="Show company bookings for next month" data-user="1">Show company bookings for next month<small>Switches to the Central Booker</small></button>
+        <button class="scenario" data-q="How much baggage can I check in?">How much baggage can I check in?<small>Policy answer from documents (RAG)</small></button>
+        <button class="scenario" data-q="Can I bring my dog on the flight?">Can I bring my dog on the flight?<small>Not in the policy: hands over</small></button>
       </div>
     </section>
 
@@ -111,6 +121,11 @@
         <div class="fr-track"><div id="frFill" class="fr-fill"></div><i class="fr-mark" style="left:50%"></i><i class="fr-mark" style="left:75%"></i></div>
         <div class="fr-scale"><span style="left:50%">offer agent</span><span style="left:75%">auto handoff</span></div>
         <div class="causes" id="frCauses"></div>
+      </section>
+
+      <section class="card pad" id="policyCard" hidden>
+        <h3>Policy lookup (RAG) <a href="/policies.html" target="_blank" rel="noopener" style="font-size:11.5px;font-weight:600;margin-left:6px">View documents</a></h3>
+        <div class="pol" id="policyTrace"></div>
       </section>
 
       <section class="card pad" id="ticketCard" hidden>
@@ -405,23 +420,117 @@ function say(text){
   bub.textContent="…";bub.classList.add("pending");scrollT();rewritesInFlight++;
   sayChain=sayChain.then(()=>toHinglish(text)).then(h=>{bub.textContent=h;bub.classList.remove("pending");bub.title="English: "+text;scrollT();rewritesInFlight--;speak(h)});
 }
-function speak(text){
-  if(!state.active||state.muted||!("speechSynthesis" in window)){afterSpeech();return}
+/* =========================
+   VOICE: natural Gemini voice, pronunciation, pauses, call ambience
+   ========================= */
+// 1) Pronunciation: turn codes, amounts, times and dates into how a person would say them.
+const CITY_SAY={BLR:"Bangalore",DEL:"Delhi",BOM:"Bombay",HYD:"Hyderabad"};
+const MONTH_FULL=["January","February","March","April","May","June","July","August","September","October","November","December"];
+function spokenText(text){
+  return String(text)
+    .replace(/\b(BLR|DEL|BOM|HYD)\b/g,m=>CITY_SAY[m])
+    .replace(/\b([A-Z]{3}H?)(\d{4})\b/g,(_,a,d)=>`${a.split("").join(" ")} ${d.split("").join(" ")}`) // booking refs read letter by letter
+    .replace(/₹\s?([\d,]+)(?=\s+(?:non-refundable|convenience|change|cancellation|fee|extra|fare))/g,"$1 rupee")
+    .replace(/₹\s?([\d,]+)/g,"$1 rupees")
+    .replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g,(_,y,m,d)=>`${+d} ${MONTH_FULL[+m-1]}`)
+    .replace(/\b([01]?\d|2[0-3]):([0-5]\d)\b/g,(_,h,m)=>{h=+h;const ap=h>=12?"PM":"AM";const hh=h%12||12;return m==="00"?`${hh} ${ap}`:`${hh}:${m} ${ap}`})
+    .replace(/(\d)\s?kg\b/g,"$1 kilos")
+    .replace(/\s*→\s*/g," to ").replace(/\s*•\s*/g,", ")
+    .replace(/\s*\(([^)]*)\)/g,", $1,")
+    .replace(/^\s*(\d+)\.\s+/gm,"Option $1, ")
+    .replace(/,\s*([.?!])/g,"$1").replace(/\s+,/g,",").replace(/,{2,}/g,",");
+}
+// 2) Natural pauses: short pauses between paragraphs and before a closing question.
+function withPauses(text){
+  return text
+    .replace(/\n{2,}/g," <short pause> ")
+    .replace(/\n/g," <short pause> ")
+    .replace(/(?<!<short pause>)\s+(Is there anything else[^?]*\?)/," <short pause> $1")
+    .replace(/\s{2,}/g," ").trim();
+}
+function voiceStyle(){
+  const base="warm, calm and polite, like a helpful travel desk agent on a phone call, at a relaxed natural pace with small pauses between sentences";
+  return state.lang==="hinglish"?`${base}, speaking natural Hinglish`:base;
+}
+
+// 3) Call ambience: faint office room tone and keyboard typing while the agent "looks things up".
+let AC=null,ambNodes=null,typingTimer=null,phoneChain=null;
+function audioCtx(){if(!AC){const C=window.AudioContext||window.webkitAudioContext;if(C)AC=new C()}if(AC&&AC.state==="suspended")AC.resume();return AC}
+function noiseBuffer(ctx,secs,brown){const b=ctx.createBuffer(1,ctx.sampleRate*secs,ctx.sampleRate),d=b.getChannelData(0);let last=0;for(let i=0;i<d.length;i++){const w=Math.random()*2-1;if(brown){last=(last+0.02*w)/1.02;d[i]=last*3.5}else d[i]=w}return b}
+function startAmbience(){
+  const ctx=audioCtx();if(!ctx||ambNodes||!$("ambience")?.checked)return;
+  const room=ctx.createBufferSource();room.buffer=noiseBuffer(ctx,4,true);room.loop=true;
+  const lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=420;
+  const g=ctx.createGain();g.gain.value=0.05;room.connect(lp).connect(g).connect(ctx.destination);room.start();
+  // distant office murmur: band-passed noise with a slow, uneven swell
+  const mur=ctx.createBufferSource();mur.buffer=noiseBuffer(ctx,4,false);mur.loop=true;
+  const bp=ctx.createBiquadFilter();bp.type="bandpass";bp.frequency.value=700;bp.Q.value=1.2;
+  const mg=ctx.createGain();mg.gain.value=0.006;const lfo=ctx.createOscillator();lfo.frequency.value=0.23;const lg=ctx.createGain();lg.gain.value=0.004;lfo.connect(lg).connect(mg.gain);
+  mur.connect(bp).connect(mg).connect(ctx.destination);mur.start();lfo.start();
+  ambNodes=[room,mur,lfo];
+}
+function stopAmbience(){if(ambNodes){ambNodes.forEach(n=>{try{n.stop()}catch(e){}});ambNodes=null}stopTyping()}
+function keyClick(ctx){
+  const src=ctx.createBufferSource();src.buffer=noiseBuffer(ctx,0.03,false);
+  const hp=ctx.createBiquadFilter();hp.type="bandpass";hp.frequency.value=1800+Math.random()*1800;hp.Q.value=2.5;
+  const g=ctx.createGain();const t=ctx.currentTime;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.10+Math.random()*0.06,t+0.002);g.gain.exponentialRampToValueAtTime(0.0001,t+0.028);
+  src.connect(hp).connect(g).connect(ctx.destination);src.start(t);src.stop(t+0.04);
+}
+function startTyping(){
+  const ctx=audioCtx();if(!ctx||!$("ambience")?.checked||!state.active||state.muted||typingTimer)return;
+  const tick=()=>{keyClick(ctx);typingTimer=setTimeout(tick,Math.random()<0.12?260+Math.random()*300:55+Math.random()*120)};tick();
+}
+function stopTyping(){if(typingTimer){clearTimeout(typingTimer);typingTimer=null}}
+
+// 4) Natural voice playback (Gemini TTS) with a phone-line sound; falls back to the browser voice.
+let currentAudio=null,ttsPending=0;
+function phoneLine(audio){
+  const ctx=audioCtx();if(!ctx)return;
+  try{const src=ctx.createMediaElementSource(audio),hp=ctx.createBiquadFilter(),lp=ctx.createBiquadFilter(),g=ctx.createGain();
+    hp.type="highpass";hp.frequency.value=250;lp.type="lowpass";lp.frequency.value=3800;g.gain.value=1.1;
+    src.connect(hp).connect(lp).connect(g).connect(ctx.destination);}catch(e){}
+}
+function botSpeaking(){return ("speechSynthesis" in window&&(speechSynthesis.speaking||speechSynthesis.pending))||(currentAudio&&!currentAudio.paused&&!currentAudio.ended)||ttsPending>0}
+function stopVoice(){if("speechSynthesis" in window)speechSynthesis.cancel();if(currentAudio){currentAudio.pause();currentAudio=null}stopTyping()}
+function browserSpeak(text){
+  if(!("speechSynthesis" in window)){afterSpeech();return}
   try{
-    const speechText=String(text)
-      .replace(/\bBLR\b/g,"Bangalore").replace(/\bDEL\b/g,"Delhi").replace(/\bBOM\b/g,"Bombay").replace(/\bHYD\b/g,"Hyderabad")
-      .replace(/\s*→\s*/g," to ").replace(/\s*•\s*/g,", ");
-    const u=new SpeechSynthesisUtterance(speechText);
-    u.lang=preferredVoice?.lang||"en-IN";
-    if(preferredVoice)u.voice=preferredVoice;
-    u.rate=.9;u.pitch=1.0;u.volume=1;
-    u.onend=afterSpeech;
-    speechSynthesis.speak(u);
+    const u=new SpeechSynthesisUtterance(spokenText(text));
+    u.lang=preferredVoice?.lang||"en-IN";if(preferredVoice)u.voice=preferredVoice;
+    u.rate=.9;u.pitch=1.0;u.volume=1;u.onend=afterSpeech;speechSynthesis.speak(u);
   }catch(e){afterSpeech()}
+}
+async function naturalSpeak(text){
+  ttsPending++;startTyping();
+  try{
+    const ctrl=new AbortController(),tm=setTimeout(()=>ctrl.abort(),14000);
+    const res=await fetch("/api/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:withPauses(spokenText(text)),style:voiceStyle()}),signal:ctrl.signal});
+    clearTimeout(tm);
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok||!data.audio)throw new Error(data.error||`TTS ${res.status}`);
+    if(!state.active||state.muted){ttsPending--;stopTyping();afterSpeech();return}
+    const a=new Audio(`data:${data.mime||"audio/wav"};base64,${data.audio}`);
+    if($("phoneline")?.checked)phoneLine(a);
+    currentAudio=a;ttsPending--;stopTyping();
+    a.onended=()=>{if(currentAudio===a)currentAudio=null;afterSpeech()};
+    a.onerror=()=>{if(currentAudio===a)currentAudio=null;browserSpeak(text)};
+    await a.play();
+    $("voiceStatus").textContent=`Voice: Gemini ${data.voice||""} (${data.model||"TTS"})${data.cached?" · cached":""}`;
+  }catch(e){
+    ttsPending=Math.max(0,ttsPending-1);stopTyping();
+    $("voiceStatus").textContent="Voice: browser voice (natural voice unavailable)";
+    trail("CLARIFY",`Natural voice unavailable; browser voice used (${e.message}).`);
+    browserSpeak(text);
+  }
+}
+function speak(text){
+  if(!state.active||state.muted){stopTyping();afterSpeech();return}
+  if($("naturalVoice")?.checked)return naturalSpeak(text);
+  stopTyping();browserSpeak(text);
 }
 function afterSpeech(){
   setTimeout(()=>{
-    if(("speechSynthesis" in window)&&(speechSynthesis.speaking||speechSynthesis.pending))return;
+    if(botSpeaking())return;
     if(rewritesInFlight>0)return;
     if(state.endAfterSpeech){state.endAfterSpeech=false;endCall();return}
     if(state.handsFree&&state.active&&!listening&&state.state!=="HUMAN")startListening(true);
@@ -508,7 +617,7 @@ function renderOutcome(){
   el.lastChild.textContent=`${state.turns} caller turn${state.turns===1?"":"s"} · ${secs}s${state.active?" so far":""} · peak frustration ${state.peak} · ${state.actions.length} action${state.actions.length===1?"":"s"} taken`;
 }
 
-function resetSession(){
+function resetSession(){const pc=document.getElementById("policyCard");if(pc)pc.hidden=true;
   Object.assign(state,{state:"IDLE",intent:"—",booking:"—",decision:"—",pending:null,bookingCandidates:[],selectedBookings:[],selectedBooking:null,frustration:0,
     causes:{},peak:0,offeredHuman:false,offerPending:false,turns:0,lastUserText:"",facts:[],actions:[],ticket:null,outcome:null,callStart:0,callEnd:0,
     rescheduleText:"",rescheduleAI:null,rescheduleOptions:[],pickedOption:null,newDate:null,linkedStay:null,disputeExplained:false,silences:0,endAfterSpeech:false});
@@ -901,7 +1010,7 @@ ${JSON.stringify(accessible)}
 The caller may speak English, Hindi, Hinglish (Hindi in Roman script mixed with English) or Devanagari, for example "mera Bombay wala flight cancel kar do", "Hyderabad trip ki date aage karni hai", "paise kab wapas aayenge". Speech-to-text may contain small errors.
 
 Return ONLY valid JSON with these keys:
-intent: one of DETAILS, CANCEL, RESCHEDULE, REFUND, COMPANY_BOOKINGS, UNSUPPORTED
+intent: one of DETAILS, CANCEL, RESCHEDULE, REFUND, COMPANY_BOOKINGS, POLICY, UNSUPPORTED
 booking_id: exact accessible booking_id if clearly identified, otherwise null
 booking_type: FLIGHT, STAY, BOTH, or null
 from_city, to_city, stay_city: Bangalore, Delhi, Bombay, Hyderabad, or null
@@ -912,7 +1021,7 @@ caller_upset: true only if the words clearly show anger or frustration
 confidence: number from 0 to 1
 reason: short explanation
 
-Rules: never invent a booking. "cancel/get rid of/drop/raddh" means CANCEL. "move/change/push/shift/aage/peeche/date badalni" means RESCHEDULE. "money back/refund/paise wapas" means REFUND. "what all/my bookings/my flights/my stays/dikhao" means DETAILS with wants_all=true. Company-wide requests are COMPANY_BOOKINGS.
+Rules: never invent a booking. "cancel/get rid of/drop/raddh" means CANCEL. "move/change/push/shift/aage/peeche/date badalni" means RESCHEDULE. "money back/refund/paise wapas" means REFUND. "what all/my bookings/my flights/my stays/dikhao" means DETAILS with wants_all=true. Company-wide requests are COMPANY_BOOKINGS. General questions about travel rules that do not act on a booking (baggage, check-in, ID, name corrections, class of travel, approval limits, hotel limits or check-in times, meal allowance, cabs, insurance, how long refunds take in general) are POLICY, for example "kitna saman le ja sakte hain" or "hotel ka check-in kab hai".
 User: ${JSON.stringify(text)}`;
   try{
     const parsed=await callAI(prompt);updateAIStatus(true);
@@ -945,9 +1054,60 @@ function applyAIHints(text,ai){
   if(ai.wants_all && !/\ball\b/i.test(enriched)) enriched += " all";
   return enriched;
 }
-function unsupported(){human("I can help with your flights and stays: booking details, cancellations, date changes and refunds. For anything else, I'll connect you with the travel desk.","Request outside what the assistant handles.","out_of_scope")}
+/* =========================
+   POLICY Q&A (RAG over docs/policies)
+   ========================= */
+let POLICY_CHUNKS=null;
+function renderPolicyTrace(q,r,via){
+  const c=$("policyCard"),box=$("policyTrace");c.hidden=false;box.innerHTML="";
+  const t=r.trace||{};const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e};
+  box.appendChild(el("div","q",`“${q}”`));
+  (t.retrieved||[]).forEach((h,i)=>{const row=el("div","hit"+(!r.refused&&i<(t.used??1)?" used":""));row.appendChild(el("div","nm",h.section));const tr=el("div","tr");const f=el("div","fl");f.style.width=Math.max(0,Math.min(1,h.score))*100+"%";tr.appendChild(f);row.appendChild(tr);row.appendChild(el("div","sc",h.score.toFixed(2)));box.appendChild(row)});
+  box.appendChild(el("div","meta",via==="rag"?`Model: ${t.model||"not called"}${t.fallbackUsed?" (fallback)":""} · tokens ${t.tokens?.input??0}/${t.tokens?.output??0} · est. $${(t.costUsd||0).toFixed(5)} · ${t.latencyMs} ms · min similarity ${t.minScore}`:`Keyword fallback (AI search unavailable) · min score ${t.minScore}`));
+  if(t.reason)box.appendChild(el("div","why",t.reason));
+}
+async function keywordPolicy(q){
+  // Rule-based fallback when the RAG service is down: keyword overlap over the same policy sections.
+  if(!POLICY_CHUNKS){const r=await fetch("/data/policy-chunks.json");POLICY_CHUNKS=await r.json()}
+  const STOP=new Set("the a an and of to in on for with is are was what how can i my do does it be or at by from much many when".split(" "));
+  const tok=x=>new Set((x.toLowerCase().match(/[a-z0-9₹]+/g)||[]).filter(w=>!STOP.has(w)).map(w=>w.length>4?w.replace(/(ing|ed|es|s)$/,""):w));
+  const qs=tok(q);const hits=POLICY_CHUNKS.map(c=>{const cs=tok(c.text);let o=0;qs.forEach(w=>{if(cs.has(w))o++});return{...c,score:qs.size?o/qs.size:0}}).sort((a,b)=>b.score-a.score).slice(0,3);
+  const MIN=0.4,top=hits[0];
+  const trace={retrieved:hits.map(h=>({source:h.source,section:h.section,score:+h.score.toFixed(2)})),minScore:MIN,used:1};
+  if(!top||top.score<MIN)return{refused:true,answer:"",trace:{...trace,reason:"No policy section matched well enough."}};
+  const body=top.text.replace(/^.*? — [^:]*: /,"");const sents=body.split(/(?<=[.!?])\s+(?=[A-Z])/);
+  return{refused:false,answer:sents.slice(0,2).join(" "),trace};
+}
+async function policyAnswer(text){
+  state.state="POLICY";state.pending=null;uiContext();
+  let r=null,via="rag";
+  try{
+    const ctrl=new AbortController(),tm=setTimeout(()=>ctrl.abort(),12000);
+    const res=await fetch("/api/policy",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({question:text}),signal:ctrl.signal});
+    clearTimeout(tm);
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok||data.error)throw new Error(data.error||`Policy service ${res.status}`);
+    r=data;
+  }catch(e){
+    via="keyword";trail("CLARIFY",`Policy search (RAG) unavailable; keyword fallback used (${e.message}).`);
+    try{r=await keywordPolicy(text)}catch(e2){r={refused:true,answer:"",trace:{retrieved:[],minScore:0,reason:"Policy documents could not be loaded."}}}
+  }
+  renderPolicyTrace(text,r,via);
+  state.state="IDLE";
+  if(r.refused){
+    const top=r.trace?.retrieved?.[0];
+    return human("I don't have that in the travel policy, so I'll connect you with the travel desk to confirm.",`Policy question not covered by the policy documents: "${text}"${top?` (closest section: ${top.section}, score ${top.score})`:""}.`,"policy_not_covered");
+  }
+  const src=[...new Set((r.trace?.retrieved||[]).slice(0,r.trace?.used||1).map(h=>h.section))].join(", ");
+  trail("AUTOMATE",`Answered a policy question from: ${src}${via==="keyword"?" (keyword fallback)":""}.`);
+  state.facts.push(`Policy: ${r.answer}`);
+  resolved();
+  say(r.answer+"\n\nIs there anything else I can help with?");
+}
+function unsupported(){human("I can help with your flights and stays: booking details, cancellations, date changes, refunds and travel policy questions. For anything else, I'll connect you with the travel desk.","Request outside what the assistant handles.","out_of_scope")}
 function intentOf(text){const n=norm(text);
   if(/(?:company|corporate)\s+(?:booking|bookings|travel|trips)|(?:all|show|share|list|give|provide).*(?:booking|bookings|trips|travel).*(?:my|our)\s+company|(?:my|our)\s+company.*(?:booking|bookings|trips|travel)|company.*(?:next month|upcoming month)|(?:next month|upcoming month).*company/.test(n))return "COMPANY_BOOKINGS";
+  if(/baggage|luggage|\bkg\b|cabin bag|check.?in bag|web check|check.?in (?:time|open|close)|hotel check.?in|time.*check.?(?:in|out)|can i (?:bring|carry|take)|counter|\bid\b|id proof|aadhaar|name (?:change|correction)|spelling|business class|class of travel|economy|policy|allowed|allowance|per diem|daily allowance|meal|cab|taxi|insurance|nightly limit|hotel limit|early check|late check|check.?out time|how long.*refund|refund.*how long|refund policy|saman|niyam/.test(n)&&!/cancel|resched|change.*date|date.*change|\bmove\b|my booking|\bpnr\b/.test(n))return "POLICY";
   if(/refund|money back|my money|paisa|kitna milega|how much.*(get back|lose)/.test(n))return "REFUND";
   if(/resched|change.*date|date.*change|\bmove\b|\bshift\b|\bpush\b|\blater\b|\bearlier\b|postpone|prepone|next week|a day later|another date|different date/.test(n))return "RESCHEDULE";
   if(/cancel|cancellation|get rid of|\bdrop\b|\bscrap\b|\bkill\b|call off|don.?t need|won.?t need|no longer need/.test(n))return "CANCEL";
@@ -962,8 +1122,8 @@ const YES_RE=/^(yes|y|yeah|yep|yup|sure|ok|okay|confirm|confirmed|proceed|go ahe
 const NO_RE=/^(no|n|nope|nah|dont|do not|not now|stop)\b/;
 async function respond(text){
   if(!text.trim())return;
-  if("speechSynthesis" in window)speechSynthesis.cancel();
-  userSay(text);state.turns++;state.silences=0;
+  stopVoice();
+  userSay(text);startTyping();state.turns++;state.silences=0;
   const t=toEnglishCues(text),n=norm(t);
 
   // Frustration signals from the caller's own words
@@ -1063,15 +1223,16 @@ async function respond(text){
   if(intent==="REFUND")return refundInfo(routedText);
   if(intent==="DETAILS")return startDetails(routedText);
   if(intent==="COMPANY_BOOKINGS")return showCompanyBookingsNextMonth();
+  if(intent==="POLICY")return policyAnswer(t);
   return unsupported();
 }
 
 /* =========================
    CALL CONTROLS, SPEECH INPUT, HANDS-FREE
    ========================= */
-function startCall(){if(state.active)return;resetSession();state.active=true;state.callStart=Date.now();$("start").disabled=true;$("end").disabled=false;$("mic").disabled=false;$("mic").textContent="🎙 Speak";$("mute").disabled=false;$("dot").classList.add("live");$("status").textContent="Call in progress: speak or type";trail("AUTOMATE","New call started.");renderOutcome();
-  say("Hi, welcome to the ABC Company travel desk. I can help with your flights and hotel stays: booking details, cancellations, date changes and refunds. What would you like to do today?")}
-function endCall(){if(!state.active)return;state.active=false;state.callEnd=Date.now();if(recognition){try{recognition.abort()}catch(e){}}if("speechSynthesis" in window)speechSynthesis.cancel();$("start").disabled=false;$("end").disabled=true;$("mic").disabled=true;$("mic").textContent="🎙 Speak";$("mute").disabled=true;$("dot").classList.remove("live");$("status").textContent="Call ended";renderOutcome()}
+function startCall(){if(state.active)return;resetSession();state.active=true;startAmbience();state.callStart=Date.now();$("start").disabled=true;$("end").disabled=false;$("mic").disabled=false;$("mic").textContent="🎙 Speak";$("mute").disabled=false;$("dot").classList.add("live");$("status").textContent="Call in progress: speak or type";trail("AUTOMATE","New call started.");renderOutcome();
+  say("Hi, welcome to the ABC Company travel desk. I'm the virtual assistant. I can help with your flights and hotel stays: booking details, cancellations, date changes, refunds and travel policy questions. What would you like to do today?")}
+function endCall(){if(!state.active)return;state.active=false;state.callEnd=Date.now();if(recognition){try{recognition.abort()}catch(e){}}stopVoice();stopAmbience();$("start").disabled=false;$("end").disabled=true;$("mic").disabled=true;$("mic").textContent="🎙 Speak";$("mute").disabled=true;$("dot").classList.remove("live");$("status").textContent="Call ended";renderOutcome()}
 let recognition=null;
 let listening=false;
 function startListening(auto=false){
@@ -1081,7 +1242,7 @@ function startListening(auto=false){
   if(!secure){signal("system_failure",15);trail("CLARIFY","Voice input needs HTTPS or localhost.");say("Voice input needs a secure connection. Please open the hosted version, or type your request below.");return}
   if(!SR){signal("system_failure",15);trail("CLARIFY","Browser speech recognition is unavailable.");say("Voice input isn't available in this browser. Please use Chrome or Edge, or type your request below.");return}
   if(listening)return;
-  if('speechSynthesis' in window&&(speechSynthesis.speaking||speechSynthesis.pending)){speechSynthesis.cancel();if(!auto){signal("verbosity",5);trail("CLARIFY","Caller interrupted the bot (barge-in); bot stopped speaking.")}}
+  if(botSpeaking()){stopVoice();if(!auto){signal("verbosity",5);trail("CLARIFY","Caller interrupted the bot (barge-in); bot stopped speaking.")}}
   const r=new SR();
   recognition=r;
   r.lang=state.lang==="hinglish"?'hi-IN':'en-IN';
@@ -1121,11 +1282,13 @@ function startListening(auto=false){
 }
 
 $("start").onclick=startCall;$("end").onclick=endCall;$("mic").onclick=()=>startListening(false);
-$("mute").onclick=()=>{state.muted=!state.muted;$("mute").textContent=state.muted?"Unmute bot":"Mute bot";if(state.muted&&"speechSynthesis" in window)speechSynthesis.cancel()};
+$("mute").onclick=()=>{state.muted=!state.muted;$("mute").textContent=state.muted?"Unmute bot":"Mute bot";if(state.muted){stopVoice();stopAmbience()}else if(state.active)startAmbience()};
 $("send").onclick=()=>{const v=$("input").value.trim();if(!v)return;if(!state.active)startCall();$("input").value="";respond(v)};
 $("input").addEventListener("keydown",e=>{if(e.key==="Enter")$("send").click()});
 $("lang").onchange=()=>{state.lang=$("lang").value};
-$("handsfree").onchange=()=>{state.handsFree=$("handsfree").checked;if(state.handsFree&&state.active&&!listening&&!(("speechSynthesis" in window)&&speechSynthesis.speaking))startListening(true)};
+$("ambience").onchange=()=>{if($("ambience").checked){if(state.active&&!state.muted)startAmbience()}else stopAmbience()};
+$("naturalVoice").onchange=()=>{$("voiceStatus").textContent=$("naturalVoice").checked?"Voice: Gemini natural voice":"Voice: browser voice"};
+$("handsfree").onchange=()=>{state.handsFree=$("handsfree").checked;if(state.handsFree&&state.active&&!listening&&!botSpeaking())startListening(true)};
 $("consoleToggle").onclick=()=>{const solo=$("grid").classList.toggle("solo");$("consoleToggle").textContent=solo?"Show agent console":"Hide agent console";$("consoleToggle").setAttribute("aria-pressed",String(!solo))};
 USERS.forEach((u,i)=>{const o=document.createElement("option");o.value=i;o.textContent=`${u.name} (${u.role})`;$("identity").appendChild(o)});
 $("identity").value=0;$("identity").onchange=()=>{endCall();state.user=USERS[+$("identity").value];resetSession();uiContext()};
@@ -1143,7 +1306,7 @@ resetSession();uiContext();
   <button class="x" id="helpClose" aria-label="Close instructions">✕</button>
   <h2 id="helpTitle">How to use</h2>
   <h3>What it is</h3>
-  <p style="margin:0">A prototype voice assistant for corporate travellers after they've booked. It looks up flights and hotel stays, cancels after a confirmation, changes dates with the real fee and fare difference, checks the company's travel policy, and hands over to the travel desk with a ticket when it shouldn't act alone. All bookings, fares and policies are sample data for "ABC Company".</p>
+  <p style="margin:0">A prototype voice assistant for corporate travellers after they've booked. It looks up flights and hotel stays, cancels after a confirmation, changes dates with the real fee and fare difference, answers travel policy questions from the policy documents (RAG), and hands over to the travel desk with a ticket when it shouldn't act alone. All bookings, fares and policies are sample data for "ABC Company".</p>
 
   <h3>Steps</h3>
   <ol>
@@ -1153,12 +1316,19 @@ resetSession();uiContext();
     <li>Press <b>Speak</b> while the bot is talking to interrupt it.</li>
   </ol>
 
+  <h3>Policy documents</h3>
+  <p style="margin:0">Policy answers come only from 15 sections of sample travel policy. <a href="/policies.html" target="_blank" rel="noopener">View the policy documents</a> to see exactly what the assistant can answer from.</p>
+
+  <h3>Voice</h3>
+  <p style="margin:0">With <b>Natural voice</b> on, replies are spoken by a Gemini text-to-speech voice. Booking references are read letter by letter, amounts as rupees, times as AM/PM, and short pauses are added between sentences. <b>Call ambience</b> adds a faint office room tone and keyboard typing while the assistant looks things up, and <b>Phone-line sound</b> makes the voice sound like a call. If the natural voice is unavailable, the browser voice is used. The assistant always introduces itself as a virtual assistant.</p>
+
   <h3>What it does on its own, and what it passes on</h3>
   <table>
     <tr><th>The bot handles</th><th>The travel desk gets</th></tr>
     <tr><td>Booking details and refund status</td><td>Anything the caller isn't allowed to see</td></tr>
     <tr><td>Cancellation, after stating the fee and re-checking the refund</td><td>Fee disputes it can't settle by explaining the fare rule, and any fee waiver</td></tr>
     <tr><td>Date changes: new flight options, change fee plus fare difference, re-check before changing, and the linked hotel</td><td>Changes above ₹3,000 extra per traveller (sent to the manager for approval), bookings still pending approval, and changes within 24 hours of departure</td></tr>
+    <tr><td>Travel policy questions (baggage, check-in, ID, hotel limits and times, allowances), answered from the policy documents with the sections shown in the console</td><td>Policy questions the documents don't cover. The bot never guesses a rule</td></tr>
     <tr><td></td><td>Anyone who asks for a person, and calls where frustration reaches 75</td></tr>
   </table>
 
