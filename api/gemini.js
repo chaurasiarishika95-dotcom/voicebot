@@ -4,7 +4,8 @@
 // errors that would fail on every model (no key, bad request) return straight away.
 const MODELS = ['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.8-flash'];
 const RETRY_NEXT = new Set([404, 408, 429, 500, 502, 503, 504]);
-const TIMEOUT_MS = 8000;
+const TIMEOUT_MS = 7000;   // per model
+const BUDGET_MS = 21000;   // whole fallback chain; the page waits 25 s
 
 async function callModel(model, prompt, apiKey) {
   const ctrl = new AbortController();
@@ -38,7 +39,9 @@ export default async function handler(req, res) {
   const first = MODELS.includes(model) ? model : MODELS[0];
   const order = [first, ...MODELS.filter(m => m !== first)];
   const tried = [];
+  const started = Date.now();
   for (const m of order) {
+    if (Date.now() - started > BUDGET_MS - 3000) { tried.push(`${m}: skipped (time budget used up)`); continue; }
     const r = await callModel(m, prompt, apiKey);
     if (r.ok) return res.status(200).json({ result: r.result, modelUsed: m, tried });
     tried.push(`${m}: ${r.status} ${r.error}`);
